@@ -1,6 +1,6 @@
-I think collaborative rocket building is a strong fit for all three modules, especially because the multiplayer and database features become natural parts of the game rather than unrelated additions.
+Rocket Workshop is a single-player rocket-building sandbox with a simple 3D construction system and a lightweight flight simulation. It runs in the browser. Player profiles (unlocked parts, credits, best score, saved rockets) are stored in a cloud database through a backend.
 
-The biggest challenge will be controlling the scope. I'd design it as a 2-player cooperative rocket-building sandbox, with a simple 3D construction system and lightweight flight simulation.
+The biggest challenge will be controlling the scope.
 
 ## Game concept
 
@@ -10,7 +10,7 @@ The biggest challenge will be controlling the scope. I'd design it as a 2-player
 
 Working concept: Rocket Workshop
 
-Two players collaborate to design a rocket using purchased modular parts. They experiment with different configurations, launch their creation, and try to reach the highest possible altitude.
+The player designs a rocket using purchased modular parts. They experiment with different configurations, launch their creation, and try to reach the highest possible altitude.
 
 There are no characters to control. Players interact directly with the rocket, its parts, and the construction interface.
 
@@ -26,47 +26,34 @@ Measure altitude and earn credits
 
 Improve the rocket and try again
 
-## Development across three sprints
+## Development across two sprints
 
-Sprint 1 — Game Framework (Weeks 1–2)
+Sprint 2 (Networking) was cancelled. The game is single-player and the work is split in two.
 
-Build the entire single-player gameplay loop locally.
+Sprint 1 — Game Framework (current focus)
+
+Build the single-player gameplay loop, then keep making it deeper and more polished.
 
 - 3D construction scene and orbiting camera.
-- Three parts: command capsule, fuel tank, engine.
+- Parts: command capsule, fuel tank, engine, side connector, and more over time.
 - Click to select parts and attach them at predefined snap points.
 - Launch button and basic vertical flight physics.
 - Maximum altitude, credits, and restart.
-- Sound effects.
+- Depth and polish: more parts and upgrades, parts that must be unlocked, better flight feedback and camera, balancing, sound effects and particles.
 
-Deliverable: A player can assemble and launch a rocket without networking.
+Deliverable: A player can assemble and launch a rocket, earn credits, and unlock better parts.
 
-Sprint 2 — Networking (Weeks 3–4)
+Sprint 3 — Cloud Profiles and Saves (after Sprint 1)
 
-Add two-player collaboration through a client-server architecture.
+Connect the game to a backend that handles all database work.
 
-- One player hosts; another joins using an IP address.
-- Both players see the same rocket.
-- Adding, removing, or changing parts synchronizes across clients.
-- Either player can initiate a launch.
-- The server calculates or authoritatively distributes the launch results.
+- Player profile found by name: credits, unlocked parts, best altitude (max score), flights count.
+- Create or load the profile when the player enters their name.
+- Update the profile after each flight and purchase.
+- Save, load, rename and delete rocket designs.
+- Store flight history.
 
-Deliverable: Two devices can collaboratively design and launch the same rocket over LAN.
-
-Online play can be a stretch goal; LAN is enough for the assignment.
-
-Sprint 3 — Cloud Databases (Weeks 5–6)
-
-Add persistent rocket designs and flight history.
-
-- Save a rocket design to the cloud.
-- Load saved designs.
-- Rename or modify existing designs.
-- Delete designs.
-- Store launch results and personal best altitude.
-- Optionally store designs and launch records in related collections.
-
-Deliverable: Players can preserve their creations and continue experimenting across sessions.
+Deliverable: Players come back later with the same name and keep their progress.
 
 ## Keep the rocket simulation simple
 
@@ -87,34 +74,25 @@ For the initial version, I would keep rockets vertically stacked, use fixed snap
 
 ## Recommended technical architecture
 
-Player 1
+Unity WebGL Client (GitHub Pages)
 
-Unity Client
+HTTPS · JSON
 
-Player 2
+Backend API
 
-Unity Client
+Validation · Profile logic · CRUD
 
-C# Game Server
+Cloud MongoDB
 
-TCP · Room state · Build validation · Launch results
+Profiles · Rocket designs · Flight history
 
-Cloud Database
-
-Saved rockets · Flight records
-
-For Sprint 2, I'd use TCP with JSON messages rather than building full real-time multiplayer physics. Since players are only editing a shared rocket, you can synchronize discrete actions such as `AddPart`, `RemovePart`, `PurchasePart`, and `Launch`.
-
-The server validates each action and broadcasts the updated rocket state to both clients. This avoids synchronizing physics objects every frame.
-
-For Sprint 3, Firebase Firestore is a reasonable option. Keep database credentials on the server, not inside the Unity client.
-
+The game never connects to the database directly. A browser cannot open raw database or TCP connections, and the database credentials must stay on the server. The game sends HTTPS requests to the backend, which validates them and talks to MongoDB. The backend must allow CORS from the GitHub Pages site.
 
 ## Modular construction — Parts snap to predefined attachment points, including side-mounted tanks and engines. More creative freedom.
 
-# Rocket Workshop — 6-Week Game Design Plan
+# Rocket Workshop — Game Design Plan
 
-A cooperative 3D rocket-building game where two players design, purchase, assemble, and launch modular rockets to reach the highest possible altitude.
+A 3D rocket-building game where the player designs, purchases, assembles, and launches modular rockets to reach the highest possible altitude.
 
 Design priorities: Creative freedom, simple physics, satisfying experimentation, and a manageable development scope.
 
@@ -222,83 +200,73 @@ To make launches visually satisfying, use a tracking camera, engine particles, a
 
 Sprint 1 — Game Framework
 
-Weeks 1–2 · Single-player MVP
+MVP first, then depth and polish (no fixed deadline)
 
 - Days 1–3: Unity project, camera, construction scene, basic part prefabs.
 - Days 4–6: Snap-point system, part selection, attachment and removal.
 - Days 7–9: Flight simulation, altitude tracking, results.
 - Days 10–12: Credits, purchasing, and UI.
 - Days 13–14: Sound, testing, README, and demo.
+- After the MVP: more parts and unlocks, flight feedback, balancing, polish.
 
 Acceptance test: Assemble a rocket with at least three components, launch it, observe its altitude, and use the reward to buy another part.
 
 Sprint 2 — Networking
 
-Weeks 3–4 · Two-player collaboration
+Cancelled. The game is single-player.
 
-- Days 1–3: TCP server and JSON message protocol.
-- Days 4–6: Host/join UI and synchronized rocket construction.
-- Days 7–9: Shared credits, purchases, and part removal.
-- Days 10–12: Synchronized launch and results.
-- Days 13–14: Two-device testing, reconnection handling, README.
+Sprint 3 — Cloud Profiles and Saves
 
-Acceptance test: Two clients connect to the same server, add parts to a shared rocket, and receive identical launch results.
+After Sprint 1 · Persistent profiles
 
-Sprint 3 — Cloud Databases
+- Step 1: Backend project, cloud MongoDB, health check endpoint, CORS.
+- Step 2: Create and load a profile by name.
+- Step 3: Save credits, unlocked parts and best altitude after flights and purchases.
+- Step 4: Save, load, rename and delete rocket designs.
+- Step 5: Flight history, validation, error handling (offline or server down), README.
 
-Weeks 5–6 · Persistent designs
-
-- Days 1–3: Configure Firestore and server integration.
-- Days 4–6: Save and load rocket designs.
-- Days 7–9: Update and delete saved designs.
-- Days 10–12: Flight history and personal best records.
-- Days 13–14: Validation, error handling, README, and final demo.
-
-Acceptance test: Save a rocket, close the game, reconnect, load the rocket, modify it, save the changes, and delete the design.
+Acceptance test: Play and unlock a part, close the browser, return with the same name, and find the credits, unlocked parts, best altitude and saved designs. Load a design, modify it, save it, and delete it.
 
 ## 5. Architecture
 
-Unity Client A
+Unity WebGL Client
 
-Unity Client B
+Backend API (HTTPS, JSON)
 
-C# TCP Server
+Validates requests · Owns the database credentials
 
-Validates construction · Manages shared state · Calculates flight
+Cloud MongoDB
 
-Firebase Firestore
+Profiles · Rocket designs · Flight history
 
-Rocket designs · Flight history
-
-The clients send commands, not entire rocket models. For example:
+A player profile looks like this:
 
 ```
 {
-  "type": "AddPart",
-  "partType": "FuelTank",
-  "parentPartId": "part_001",
-  "socketId": "side_left"
+  "name": "Santi",
+  "credits": 340,
+  "unlockedParts": ["Capsule", "FuelTank", "Engine"],
+  "bestAltitude": 2450,
+  "flights": 12
 }
 ```
 
-The server validates the command, updates the shared rocket state, and sends the result to both players.
+Each rocket design is a small JSON structure containing part types, IDs, and attachment relationships. It is the same `RocketDesign` model used to build and simulate rockets, so saving it to the cloud needs no extra conversion.
 
-Each rocket design can be represented as a small JSON structure containing part types, IDs, and attachment relationships. This same structure can be reused for multiplayer synchronization and cloud saves.
+Profiles are found by player name, with no password. This is enough for the project, but anyone can use any name.
 
 ## 6. Scope boundaries
 
-| Include in the six-week project | Leave for later           |
+| Include                         | Leave for later           |
 | ------------------------------- | ------------------------- |
 | Modular snap construction       | Freeform construction     |
-| 4 basic part types              | Large part catalog        |
-| Shared currency                 | Complex economy           |
+| Small part catalog that grows   | Large part catalog        |
+| Credits and unlockable parts    | Complex economy           |
 | Automatic vertical flight       | Manual piloting           |
-| Two-player collaboration        | More than two players     |
-| LAN via IP                      | Public matchmaking        |
-| Cloud save/load                 | Public rocket marketplace |
+| Single player                   | Multiplayer               |
+| Cloud profiles and saved rockets| Public rocket marketplace |
 | Simple flight results           | Realistic orbital physics |
-
-One technical detail: Supporting online play over the public internet is a separate challenge from LAN. A TCP server running on a publicly reachable host could support both, but NAT traversal, hosting, and security add work. I'd guarantee LAN for Sprint 2 and treat internet play as an optional improvement.
+| Name-based profiles             | Accounts and passwords    |
 
 ## 7. A small interactive rocket-design experiment
 
@@ -344,12 +312,11 @@ Total mass
 
 ## My main recommendation
 
-Before writing any networking or database code, define a single reusable `RocketDesign` data model. It should describe the parts, their unique IDs, and how they connect.
+Define a single reusable `RocketDesign` data model. It should describe the parts, their unique IDs, and how they connect.
 
-That will be the foundation for all three sprints:
+That will be the foundation for both sprints:
 
 - Sprint 1 uses it to build and simulate rockets.
-- Sprint 2 synchronizes it between players.
 - Sprint 3 saves and loads it from the cloud.
 
 This is the architectural decision most likely to save you time later.

@@ -26,6 +26,10 @@ namespace RocketToTheMoon.UI
 
             playButton.onClick.AddListener(OpenNamePanel);
             quitButton.onClick.AddListener(Quit);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // A browser tab cannot be closed by the game.
+            quitButton.gameObject.SetActive(false);
+#endif
             confirmButton.onClick.AddListener(Confirm);
             backButton.onClick.AddListener(CloseNamePanel);
             nameInput.onValueChanged.AddListener(_ => RefreshConfirm());

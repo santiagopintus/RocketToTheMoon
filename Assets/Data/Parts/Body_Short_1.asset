@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.BodyData
   id: body_short_1
   partName: Body Short
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 75d5b443c6649b84fb7a377dc4b05b08, type: 3}
   prefab: {fileID: 4215454831353977850, guid: 46f32d9f319dae742bb474f9a6654a7a, type: 3}
-  price: 0
+  price: 60
   mass: 75

@@ -29,6 +29,27 @@ namespace RocketToTheMoon.Tests
             Assert.AreEqual(PlayerSession.MaxNameLength, result.Length);
         }
 
+        // Rocket stats add up mass, thrust and fuel, and thrust/weight uses the full mass.
+        [Test]
+        public void RocketStats_AddsPartsAndThrustToWeight()
+        {
+            var thruster = UnityEngine.ScriptableObject.CreateInstance<ThrusterData>();
+            thruster.mass = 50f;
+            thruster.thrust = 2000f;
+            var tank = UnityEngine.ScriptableObject.CreateInstance<FuelTankData>();
+            tank.mass = 50f;
+            tank.fuelCapacity = 100f;
+
+            var stats = new RocketStats();
+            stats.Add(thruster);
+            stats.Add(tank);
+
+            Assert.AreEqual(2, stats.PartCount);
+            Assert.AreEqual(100f, stats.DryMass);
+            Assert.AreEqual(200f, stats.FullMass(1f));
+            Assert.AreEqual(1f, stats.ThrustToWeight(stats.FullMass(1f), 10f), 0.0001f);
+        }
+
         // Both scenes must be enabled in the build, or the web build has no game.
         [Test]
         public void BuildSettings_HasBothScenes()

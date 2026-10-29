@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FuelTankData
   id: tank_large
   partName: Tank Large
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 72b21be00981b75468765f917c527ef8, type: 3}
   prefab: {fileID: 7956281813477704838, guid: a90884800afc9da44a71b0a2ce09bb01, type: 3}
-  price: 0
+  price: 250
   mass: 55
   fuelCapacity: 140

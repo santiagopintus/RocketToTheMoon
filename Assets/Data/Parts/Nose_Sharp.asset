@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.NoseData
   id: nose_sharp
   partName: Nose Sharp
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f207cae3b105d0544bbe836805ec6bc7, type: 3}
   prefab: {fileID: 6059967251238327097, guid: 818850e95c61a5a49901e991db9ea5e1, type: 3}
-  price: 0
+  price: 120
   mass: 30

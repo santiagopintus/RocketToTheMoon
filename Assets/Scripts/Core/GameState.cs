@@ -8,9 +8,12 @@ namespace RocketToTheMoon.Core
         public static float Altitude { get; private set; }
         public static float MaxAltitude { get; private set; }
         public static bool IsFlying { get; private set; }
+        public static float Speed { get; private set; }
+        public static float FuelLeft { get; private set; } = 1f;
 
         public static event Action FlightStarted;
         public static event Action<float> AltitudeChanged;
+        public static event Action<float> FuelChanged;
         public static event Action FlightEnded;
 
         // Resets the flight numbers and tells everyone the rocket launched.
@@ -18,8 +21,22 @@ namespace RocketToTheMoon.Core
         {
             Altitude = 0f;
             MaxAltitude = 0f;
+            Speed = 0f;
             IsFlying = true;
             FlightStarted?.Invoke();
+        }
+
+        // Saves the current speed in metres per second.
+        public static void SetSpeed(float speed)
+        {
+            Speed = speed;
+        }
+
+        // Saves how much fuel is left (0 = empty, 1 = full) and tells everyone about it.
+        public static void SetFuel(float fuelLeft)
+        {
+            FuelLeft = fuelLeft;
+            FuelChanged?.Invoke(fuelLeft);
         }
 
         // Saves the new altitude and tells everyone about it.

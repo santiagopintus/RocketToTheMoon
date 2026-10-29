@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.ThrusterData
   id: thruster_small
   partName: Thruster Small
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: fa6fec218a29ce549915de4c0da421d8, type: 3}
   prefab: {fileID: 2777104934385308202, guid: acd099c76eed7f94e9d80a6ad0361181, type: 3}
-  price: 0
+  price: 100
   mass: 55
   thrust: 4000
   fuelPerSecond: 2

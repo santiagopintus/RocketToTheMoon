@@ -21,7 +21,8 @@ namespace RocketToTheMoon.Core
         [SerializeField] AudioClip snapClick;
         [SerializeField] Texture2D openHand;
         [SerializeField] Texture2D closedHand;
-        [SerializeField] Renderer padBase;
+        [SerializeField] Collider padBase;
+        [SerializeField] float floatGap = 0.25f;
 
         // Called every time a part is added, moved or removed.
         public event Action Changed;
@@ -492,7 +493,7 @@ namespace RocketToTheMoon.Core
                 r.SetPropertyBlock(on ? block : null);
         }
 
-        // Lifts or lowers the rocket so its lowest point touches the top of the pad.
+        // Lifts or lowers the rocket so its lowest point floats just above the pad.
         void SitOnPad()
         {
             MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>();
@@ -502,10 +503,35 @@ namespace RocketToTheMoon.Core
             foreach (MeshRenderer r in renderers)
                 lowest = Mathf.Min(lowest, r.bounds.min.y);
 
-            float lift = transform.position.y - lowest;
+            float lift = FloatHeight() - lowest;
             foreach (Transform child in transform)
                 if (child.GetComponent<RocketPart>() != null)
                     child.position += Vector3.up * lift;
+        }
+
+        // The height where the rocket's bottom floats: the top of the pad plus part of the pad's height, so a bigger pad gives a bigger gap.
+        float FloatHeight()
+        {
+            if (padBase == null) return transform.position.y;
+
+            float top = padBase.bounds.max.y;
+            float height = top - padBase.transform.position.y;
+            return top + height * floatGap;
+        }
+
+        // The box around the parts on the rocket, without the part being dragged. Has no size when the rocket is empty.
+        public Bounds PlacedBounds()
+        {
+            Bounds bounds = new Bounds(transform.position, Vector3.zero);
+            bool first = true;
+            foreach (MeshRenderer r in GetComponentsInChildren<MeshRenderer>())
+            {
+                if (preview != null && r.transform.IsChildOf(preview.transform)) continue;
+                if (first) bounds = r.bounds;
+                else bounds.Encapsulate(r.bounds);
+                first = false;
+            }
+            return bounds;
         }
 
         // Returns true if the rocket (or the part being dragged) uses this part.

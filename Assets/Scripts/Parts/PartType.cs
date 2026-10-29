@@ -4,9 +4,9 @@ namespace RocketToTheMoon.Core
     public enum PartType
     {
         Body,
-        Tip,
+        Nose,
         Thruster,
         FuelTank,
-        Wing
+        Fin
     }
 }

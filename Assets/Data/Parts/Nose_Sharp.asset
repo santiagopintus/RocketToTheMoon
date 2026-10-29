@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 903aef02a8f0786459ce141dc2301ae5, type: 3}
-  m_Name: Tip_Sharp
-  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.TipData
-  id: tip_sharp
-  partName: Tip Sharp
+  m_Name: Nose_Sharp
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.NoseData
+  id: nose_sharp
+  partName: Nose Sharp
   icon: {fileID: 0}
   prefab: {fileID: 6059967251238327097, guid: 818850e95c61a5a49901e991db9ea5e1, type: 3}
   price: 0

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e4cc45bb28c97b642806bdf025d2b367, type: 3}
-  m_Name: Wing_Large_1
-  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.WingData
-  id: wing_large_1
-  partName: Wing Large
+  m_Name: Fin_Large_1
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FinData
+  id: fin_large_1
+  partName: Fin Large
   icon: {fileID: 0}
   prefab: {fileID: 409259710324082620, guid: fd48435314fc4bd4ca52b4dc6e92f5f1, type: 3}
   price: 0

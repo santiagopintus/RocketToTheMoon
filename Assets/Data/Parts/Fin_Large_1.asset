@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FinData
   id: fin_large_1
   partName: Fin Large
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 645617e4a5c6e6e4db2a6c9241066950, type: 3}
   prefab: {fileID: 409259710324082620, guid: fd48435314fc4bd4ca52b4dc6e92f5f1, type: 3}
-  price: 0
+  price: 90
   mass: 20

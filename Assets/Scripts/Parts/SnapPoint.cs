@@ -16,6 +16,9 @@ namespace RocketToTheMoon.Core
     {
         public SnapSide side;
 
+        // True once a part is attached here.
+        [System.NonSerialized] public bool taken;
+
         // Draws the point in the Scene view so it is easy to place.
         void OnDrawGizmos()
         {

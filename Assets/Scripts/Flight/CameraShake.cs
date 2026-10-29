@@ -9,15 +9,10 @@ namespace RocketToTheMoon.Core
         [SerializeField] float minStrength = 0.001f;
         [SerializeField] float maxStrength = 0.004f;
 
-        Vector3 startPosition;
+        Vector3 lastOffset;
 
-        // Remembers where the camera starts.
-        void Start()
-        {
-            if (targetCamera != null) startPosition = targetCamera.transform.localPosition;
-        }
-
-        // Moves the camera a little each frame while flying, and puts it back when the flight ends.
+        // Swaps last frame's shake for a new one while flying, and removes it when the flight ends.
+        // It only adds an offset, so other scripts (like CameraFollow) can still move the camera.
         void Update()
         {
             if (targetCamera == null) return;
@@ -26,7 +21,8 @@ namespace RocketToTheMoon.Core
             if (GameState.IsFlying)
                 offset = Random.insideUnitSphere * Random.Range(minStrength, maxStrength);
 
-            targetCamera.transform.localPosition = startPosition + offset;
+            targetCamera.transform.localPosition += offset - lastOffset;
+            lastOffset = offset;
         }
     }
 }

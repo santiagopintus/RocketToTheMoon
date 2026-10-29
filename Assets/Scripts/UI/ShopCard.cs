@@ -18,11 +18,13 @@ namespace RocketToTheMoon.UI
         PartData part;
         RocketBuilder builder;
         TMP_Text buttonLabel;
+        Color nameColor;
 
-        // Connects the Buy button.
+        // Connects the Buy button and remembers the name colour, so it can come back after greying out.
         void Awake()
         {
             buttonLabel = buyButton.GetComponentInChildren<TMP_Text>();
+            nameColor = nameLabel.color;
             buyButton.onClick.AddListener(BuyOrSell);
         }
 
@@ -97,14 +99,19 @@ namespace RocketToTheMoon.UI
         }
 
         // Shows the price and Buy button, or "OWNED" and a Sell button. A part on the rocket cannot be sold.
+        // Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text.
         void Refresh()
         {
             if (part == null) return;
 
             bool owned = PlayerSession.IsUnlocked(part.id);
             bool canAfford = PlayerSession.Credits >= part.price;
+            bool blocked = !builder.CanAdd(part);
 
-            priceLabel.text = owned ? "OWNED" : part.price + " cr";
+            icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
+            nameLabel.color = blocked ? Palette.Teal : nameColor;
+
+            priceLabel.text = owned ? (blocked ? "<size=70%>BODY FIRST</size>" : "OWNED") : part.price + " cr";
             priceLabel.color = owned ? Palette.LightTeal : canAfford ? Palette.Moonlight : Palette.Teal;
             buttonLabel.text = owned ? "SELL" : "BUY";
             buyButton.interactable = owned ? !builder.IsUsed(part) : canAfford;

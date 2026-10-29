@@ -92,7 +92,7 @@ namespace RocketToTheMoon.Core
         bool CanGrab(Vector2 position)
         {
             if (GameState.IsFlying) return false;
-            if (HoveredCard != null) return PlayerSession.IsUnlocked(HoveredCard.id);
+            if (HoveredCard != null) return PlayerSession.IsUnlocked(HoveredCard.id) && CanAdd(HoveredCard);
             return !IsOverUI() && PartUnder(position) != null;
         }
 
@@ -156,7 +156,7 @@ namespace RocketToTheMoon.Core
         {
             bool isFin = data.Type == PartType.Fin;
             int newParts = isFin ? 2 : 1;
-            if (GameState.IsFlying || PartCount() + newParts > maxParts) return;
+            if (GameState.IsFlying || PartCount() + newParts > maxParts || !CanAdd(data)) return;
 
             dragData = data;
             iconPixels = iconHeight;
@@ -209,14 +209,12 @@ namespace RocketToTheMoon.Core
         // Puts the dragged part (and its mirror fin on the other side) on the chosen snap point.
         void Snap()
         {
-            preview.transform.localScale = Vector3.one;
             PlaceAt(preview, previewSnap);
             preview.SetActive(true);
 
             if (mirrorPreview != null)
             {
                 mirrorSnap = MirrorSnap(previewSnap);
-                mirrorPreview.transform.localScale = Vector3.one;
                 PlaceAt(mirrorPreview, mirrorSnap);
                 mirrorPreview.SetActive(true);
             }
@@ -369,7 +367,6 @@ namespace RocketToTheMoon.Core
         // Turns a preview into a real part: exactly on its snap point at normal size, normal colours, and its snap points are marked as taken.
         void Keep(GameObject part, SnapPoint snap)
         {
-            part.transform.localScale = Vector3.one;
             PlaceAt(part, snap);
             Tint(part, false);
             snap.taken = true;
@@ -411,10 +408,11 @@ namespace RocketToTheMoon.Core
             return owner.data.Accepts(snap.side, type);
         }
 
-        // Puts a part on a snap point. If the part has a snap point on the opposite side, that point lines up with it.
+        // Puts a part on a snap point at normal size. If the part has a snap point on the opposite side, that point lines up with it.
         static void PlaceAt(GameObject part, SnapPoint snap)
         {
             part.transform.SetParent(snap.transform.parent);
+            part.transform.localScale = Vector3.one;
             part.transform.SetPositionAndRotation(snap.transform.position, snap.transform.rotation);
 
             SnapPoint ownSnap = OwnSnap(part, Opposite(snap.side));
@@ -480,6 +478,20 @@ namespace RocketToTheMoon.Core
             foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
                 if (part.data == data) return true;
             return false;
+        }
+
+        // Returns true if the part can be added now. Every part except a body needs a body on the pad first.
+        public bool CanAdd(PartData data)
+        {
+            return data.Type == PartType.Body || PadBody() != null;
+        }
+
+        // The body sitting on the pad, or null if there is none.
+        BodyData PadBody()
+        {
+            foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
+                if (part.attachedTo == padSnap) return part.data as BodyData;
+            return null;
         }
 
         // How many parts the rocket has (the hidden preview does not count).

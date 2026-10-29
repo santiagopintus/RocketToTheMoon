@@ -1,3 +1,4 @@
+using System.Collections;
 using RocketToTheMoon.Core;
 using TMPro;
 using UnityEngine;
@@ -7,25 +8,31 @@ using UnityEngine.UI;
 namespace RocketToTheMoon.UI
 {
     // One part in the store: picture, name, stats, price and a Buy button. Owned parts can be dragged onto the rocket or sold back at the same price.
-    public class ShopCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
+    // A card that cannot be dragged shows a short message over itself when the player presses it.
+    public class ShopCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
     {
         [SerializeField] Image icon;
         [SerializeField] TMP_Text nameLabel;
         [SerializeField] TMP_Text statsLabel;
         [SerializeField] TMP_Text priceLabel;
         [SerializeField] Button buyButton;
+        [SerializeField] CanvasGroup lockedOverlay;
+        [SerializeField] TMP_Text lockedLabel;
+        [SerializeField] float lockedShowTime = 1f;
+        [SerializeField] float lockedFadeTime = 0.3f;
 
         PartData part;
         RocketBuilder builder;
         TMP_Text buttonLabel;
         Color nameColor;
 
-        // Connects the Buy button and remembers the name colour, so it can come back after greying out.
+        // Connects the Buy button, remembers the name colour (so it can come back after greying out) and hides the locked message.
         void Awake()
         {
             buttonLabel = buyButton.GetComponentInChildren<TMP_Text>();
             nameColor = nameLabel.color;
             buyButton.onClick.AddListener(BuyOrSell);
+            if (lockedOverlay != null) lockedOverlay.alpha = 0f;
         }
 
         // Starts listening for credit changes, since they change what the player can afford.
@@ -87,6 +94,43 @@ namespace RocketToTheMoon.UI
             if (PlayerSession.IsUnlocked(part.id)) builder.StartDrag(part, iconHeight);
         }
 
+        // Shows why the part cannot be dragged, if it cannot.
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            string reason = LockedReason();
+            if (reason == null || lockedOverlay == null) return;
+
+            lockedLabel.text = reason;
+            StopAllCoroutines();
+            StartCoroutine(FlashLocked());
+        }
+
+        // The message for a part that cannot be dragged now, or null if it can.
+        string LockedReason()
+        {
+            if (!PlayerSession.IsUnlocked(part.id))
+            {
+                if (!PlayerSession.IsAvailable(part)) return "UNLOCK AT " + part.unlockAltitude.ToString("0") + " m";
+                return "BUY IT FIRST";
+            }
+            if (!builder.CanAdd(part)) return "PLACE A BODY FIRST";
+            if (builder.IsFull()) return "ROCKET IS FULL";
+            return null;
+        }
+
+        // Shows the locked message for a moment, then fades it out.
+        IEnumerator FlashLocked()
+        {
+            lockedOverlay.alpha = 1f;
+            yield return new WaitForSeconds(lockedShowTime);
+            for (float time = 0f; time < lockedFadeTime; time += Time.deltaTime)
+            {
+                lockedOverlay.alpha = 1f - time / lockedFadeTime;
+                yield return null;
+            }
+            lockedOverlay.alpha = 0f;
+        }
+
         // Does nothing: the builder moves the part every frame. Unity only sends begin and end drag when this exists.
         public void OnDrag(PointerEventData eventData)
         {
@@ -99,7 +143,7 @@ namespace RocketToTheMoon.UI
         }
 
         // Shows the price and Buy button, or "OWNED" and a Sell button. A part on the rocket cannot be sold.
-        // Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text.
+        // Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text. Owned parts are also greyed out when the rocket is full.
         // Parts not reached yet are greyed out and say which altitude unlocks them.
         void Refresh()
         {
@@ -108,13 +152,17 @@ namespace RocketToTheMoon.UI
             bool owned = PlayerSession.IsUnlocked(part.id);
             bool canAfford = PlayerSession.Credits >= part.price;
             bool available = PlayerSession.IsAvailable(part);
-            bool blocked = !builder.CanAdd(part) || !available;
+            bool needsBody = !builder.CanAdd(part);
+            bool full = owned && builder.IsFull();
+            bool blocked = needsBody || full || !available;
 
             icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
             nameLabel.color = blocked ? Palette.Teal : nameColor;
 
             if (!available && !owned) priceLabel.text = "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
-            else if (owned) priceLabel.text = blocked ? "<size=70%>BODY FIRST</size>" : "OWNED";
+            else if (owned && needsBody) priceLabel.text = "<size=70%>BODY FIRST</size>";
+            else if (full) priceLabel.text = "<size=70%>ROCKET FULL</size>";
+            else if (owned) priceLabel.text = "OWNED";
             else priceLabel.text = part.price + " cr";
 
             priceLabel.color = owned ? Palette.LightTeal : canAfford && available ? Palette.Moonlight : Palette.Teal;

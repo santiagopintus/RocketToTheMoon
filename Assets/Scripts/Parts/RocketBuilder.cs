@@ -21,9 +21,13 @@ namespace RocketToTheMoon.Core
         [SerializeField] AudioClip snapClick;
         [SerializeField] Texture2D openHand;
         [SerializeField] Texture2D closedHand;
+        [SerializeField] Renderer padBase;
 
         // Called every time a part is added, moved or removed.
         public event Action Changed;
+
+        // The most parts a rocket can have.
+        public int MaxParts => maxParts;
 
         // The store card under the cursor, or null. Set by the store cards.
         public PartData HoveredCard { get; set; }
@@ -49,7 +53,7 @@ namespace RocketToTheMoon.Core
             audioSource.playOnAwake = false;
         }
 
-        // Moves the dragged part every frame, picks up a placed part when the player presses on it, and updates the hand cursor.
+        // Moves the dragged part every frame, picks up a placed part when the player presses on it, and updates the hand cursor and outline.
         void Update()
         {
             Pointer pointer = Pointer.current;
@@ -61,9 +65,9 @@ namespace RocketToTheMoon.Core
                 if (movingPlaced && !pointer.press.isPressed) EndDrag();
                 else Move(position);
             }
-            else if (pointer.press.wasPressedThisFrame && !GameState.IsFlying && !IsOverUI())
+            else if (pointer.press.wasPressedThisFrame)
             {
-                RocketPart part = PartUnder(position);
+                RocketPart part = GrabbablePart(position);
                 if (part != null)
                 {
                     PickUp(part);
@@ -72,6 +76,25 @@ namespace RocketToTheMoon.Core
             }
 
             UpdateCursor(position);
+            UpdateOutline(position);
+        }
+
+        // Outlines the dragged part, or else the part a press would pick up right now (the same check as picking up, so an outline always means it can be dragged).
+        void UpdateOutline(Vector2 position)
+        {
+            if (preview != null) PartOutline.Show(preview.activeSelf ? preview : null);
+            else
+            {
+                RocketPart part = GrabbablePart(position);
+                PartOutline.Show(part != null ? part.gameObject : null);
+            }
+        }
+
+        // The placed part a press would pick up now, or null (none while flying, dragging or over the UI).
+        RocketPart GrabbablePart(Vector2 position)
+        {
+            if (preview != null || GameState.IsFlying || IsOverUI()) return null;
+            return PartUnder(position);
         }
 
         // Shows a closed hand while dragging, an open hand over something that can be grabbed, and the normal arrow otherwise.
@@ -92,7 +115,7 @@ namespace RocketToTheMoon.Core
         {
             if (GameState.IsFlying) return false;
             if (HoveredCard != null) return PlayerSession.IsUnlocked(HoveredCard.id) && CanAdd(HoveredCard);
-            return !IsOverUI() && PartUnder(position) != null;
+            return GrabbablePart(position) != null;
         }
 
         // Lifts a placed part (with everything attached to it) off the rocket.
@@ -157,7 +180,7 @@ namespace RocketToTheMoon.Core
         // Called when a store card starts dragging. iconHeight is the card picture's height in pixels, so the part can appear at that size.
         public void StartDrag(PartData data, float iconHeight)
         {
-            if (GameState.IsFlying || PartCount() >= maxParts || !CanAdd(data)) return;
+            if (GameState.IsFlying || IsFull() || !CanAdd(data)) return;
 
             dragData = data;
             iconPixels = iconHeight;
@@ -225,6 +248,18 @@ namespace RocketToTheMoon.Core
             float lag = Vector3.Dot(point - (from + hang), cam.right);
             Quaternion tilt = Quaternion.AngleAxis(Mathf.Clamp(-lag * tiltPerMetre, -maxTilt, maxTilt), cam.forward);
             preview.transform.SetPositionAndRotation(point - tilt * hang, tilt * transform.rotation);
+            RestOnBase();
+        }
+
+        // Lifts the dragged part so it rests on top of the rocket base instead of sinking into it.
+        void RestOnBase()
+        {
+            if (padBase == null) return;
+
+            Bounds part = PartBounds(preview);
+            Bounds pad = padBase.bounds;
+            if (part.Intersects(pad) && part.min.y < pad.max.y)
+                preview.transform.position += Vector3.up * (pad.max.y - part.min.y);
         }
 
         // Moves a part from where it was a bit towards where it is now (its goal), and its size towards its goal size.
@@ -495,6 +530,12 @@ namespace RocketToTheMoon.Core
             foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
                 if (part.attachedTo == padSnap) return part.data as BodyData;
             return null;
+        }
+
+        // Returns true if the rocket already has the most parts allowed.
+        public bool IsFull()
+        {
+            return PartCount() >= maxParts;
         }
 
         // How many parts the rocket has (the hidden preview does not count).

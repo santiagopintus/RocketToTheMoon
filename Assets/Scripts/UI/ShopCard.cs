@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace RocketToTheMoon.UI
 {
     // One part in the store: picture, name, stats, price and a Buy button. Owned parts can be dragged onto the rocket or sold back at the same price.
-    public class ShopCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class ShopCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] Image icon;
         [SerializeField] TMP_Text nameLabel;
@@ -54,7 +54,21 @@ namespace RocketToTheMoon.UI
         // Stops listening to the builder.
         void OnDestroy()
         {
-            if (builder != null) builder.Changed -= Refresh;
+            if (builder == null) return;
+            builder.Changed -= Refresh;
+            if (builder.HoveredCard == part) builder.HoveredCard = null;
+        }
+
+        // Tells the builder the cursor is over this card, so it can show the open hand.
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            builder.HoveredCard = part;
+        }
+
+        // Tells the builder the cursor left this card.
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (builder.HoveredCard == part) builder.HoveredCard = null;
         }
 
         // Sells the part if the player owns it, otherwise buys it. The credits change and every card refreshes.
@@ -64,16 +78,16 @@ namespace RocketToTheMoon.UI
             else PlayerSession.TryBuy(part.id, part.price);
         }
 
-        // Starts dragging a copy of the part, if the player owns it.
+        // Starts dragging a copy of the part, if the player owns it. The part appears at the same size as the card's picture.
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (PlayerSession.IsUnlocked(part.id)) builder.StartDrag(part);
+            float iconHeight = icon.rectTransform.rect.height * icon.canvas.scaleFactor;
+            if (PlayerSession.IsUnlocked(part.id)) builder.StartDrag(part, iconHeight);
         }
 
-        // Moves the dragged part to the snap point closest to the cursor.
+        // Does nothing: the builder moves the part every frame. Unity only sends begin and end drag when this exists.
         public void OnDrag(PointerEventData eventData)
         {
-            builder.Drag(eventData.position);
         }
 
         // Drops the part: it stays if it is on a snap point.

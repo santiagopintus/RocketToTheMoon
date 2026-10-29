@@ -7070,6 +7070,7 @@ MonoBehaviour:
   simulator: {fileID: 1468679893}
   statsLabel: {fileID: 356168061}
   hintLabel: {fileID: 361850301}
+  launchButton: {fileID: 458402879}
 --- !u!114 &489886777
 MonoBehaviour:
   m_ObjectHideFlags: 0

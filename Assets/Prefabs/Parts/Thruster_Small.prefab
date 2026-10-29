@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5696207377948143965}
+  - component: {fileID: 485827119025807268}
   m_Layer: 0
   m_Name: Thruster_Small
   m_TagString: Untagged
@@ -32,6 +33,19 @@ Transform:
   - {fileID: 1861692589390168565}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &485827119025807268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2777104934385308202}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7431d387425682c40ad5c667fda37842, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.RocketPart
+  data: {fileID: 11400000, guid: e95e4b8f34c6f964eb3dee31ca183082, type: 2}
 --- !u!1 &4999530907640625243
 GameObject:
   m_ObjectHideFlags: 0

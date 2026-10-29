@@ -144,6 +144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 437701693852436768}
+  - component: {fileID: 254427624998068270}
   m_Layer: 0
   m_Name: Tank_Normal_1
   m_TagString: Untagged
@@ -171,6 +172,19 @@ Transform:
   - {fileID: 5649659866018016506}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &254427624998068270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6232978428399889423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7431d387425682c40ad5c667fda37842, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.RocketPart
+  data: {fileID: 11400000, guid: 342955d22f0a37c469f498d037d7bda9, type: 2}
 --- !u!1 &6702880043465952566
 GameObject:
   m_ObjectHideFlags: 0

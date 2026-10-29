@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3520122108512330685}
+  - component: {fileID: 8609897335477277624}
   m_Layer: 0
   m_Name: Fin_Large_1
   m_TagString: Untagged
@@ -32,6 +33,19 @@ Transform:
   - {fileID: 7530666892214609541}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8609897335477277624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 409259710324082620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7431d387425682c40ad5c667fda37842, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.RocketPart
+  data: {fileID: 11400000, guid: c7de141ed2f32f44ca3496ca2d4c9224, type: 2}
 --- !u!1 &2989169675738798479
 GameObject:
   m_ObjectHideFlags: 0

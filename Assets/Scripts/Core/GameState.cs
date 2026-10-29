@@ -15,6 +15,7 @@ namespace RocketToTheMoon.Core
         public static event Action<float> AltitudeChanged;
         public static event Action<float> FuelChanged;
         public static event Action FlightEnded;
+        public static event Action Landed;
 
         // Resets the flight numbers and tells everyone the rocket launched.
         public static void StartFlight()
@@ -52,6 +53,12 @@ namespace RocketToTheMoon.Core
         {
             IsFlying = false;
             FlightEnded?.Invoke();
+        }
+
+        // Tells everyone the rocket is back on the ground after falling.
+        public static void Land()
+        {
+            Landed?.Invoke();
         }
     }
 }

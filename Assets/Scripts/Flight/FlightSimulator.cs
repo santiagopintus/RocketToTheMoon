@@ -8,13 +8,14 @@ namespace RocketToTheMoon.Core
         [SerializeField] float gravity = 9.81f;
         [SerializeField] float massPerFuel = 1f;
         [SerializeField] float visualScale = 0.01f;
-        [SerializeField] float resetDelay = 3f;
-        [SerializeField] float flipSpeed = 90f;
+        [SerializeField] float pushSpeed = 0.3f;
+        [SerializeField] float spinSpeed = 2f;
+        [SerializeField] float fallDrag = 0.5f;
 
         Vector3 startPosition;
         Quaternion startRotation;
-        bool falling;
-        float landingAltitude;
+        Rigidbody body;
+        bool landed;
         float dryMass;
         float thrust;
         float fuelPerSecond;
@@ -39,26 +40,22 @@ namespace RocketToTheMoon.Core
         {
             if (GameState.IsFlying) return;
 
-            CancelInvoke(nameof(ResetToPad));
-            falling = false;
-            transform.position = startPosition;
-            transform.rotation = startRotation;
+            ResetToPad();
             ReadParts();
             altitude = 0f;
             velocity = 0f;
-            landingAltitude = RocketHeight() / visualScale;
             GameState.StartFlight();
         }
 
-        // Measures how tall the rocket is in the scene, from all its visible parts.
-        float RocketHeight()
+        // The box around all the visible parts of the rocket.
+        Bounds RocketBounds()
         {
             Renderer[] renderers = GetComponentsInChildren<Renderer>();
-            if (renderers.Length == 0) return 0f;
+            if (renderers.Length == 0) return new Bounds(transform.position, Vector3.zero);
 
             Bounds bounds = renderers[0].bounds;
             foreach (Renderer r in renderers) bounds.Encapsulate(r.bounds);
-            return bounds.size.y;
+            return bounds;
         }
 
         // Adds up mass, thrust, fuel use and fuel from every part under this object.
@@ -84,7 +81,7 @@ namespace RocketToTheMoon.Core
         // Moves the flight forward one fixed step, so the same rocket always gives the same result.
         void FixedUpdate()
         {
-            if (falling) Fall();
+            if (body != null) ShowFallAltitude();
             if (!GameState.IsFlying) return;
 
             float dt = Time.fixedDeltaTime;
@@ -119,34 +116,60 @@ namespace RocketToTheMoon.Core
             if (!burning && velocity <= 0f)
             {
                 GameState.EndFlight();
-                falling = altitude > landingAltitude;
-                if (!falling) Invoke(nameof(ResetToPad), resetDelay);
+                if (altitude > 0f) StartFalling();
+                else GameState.Land();
             }
         }
 
-        // Lets the rocket drop with gravity while it turns nose down, until the nose hits the pad.
-        void Fall()
+        // Hands the rocket to Unity physics with a small random push and spin, so it tumbles down and lands anywhere.
+        void StartFalling()
         {
-            float dt = Time.fixedDeltaTime;
-            velocity -= gravity * dt;
-            altitude = Mathf.Max(landingAltitude, altitude + velocity * dt);
+            Bounds bounds = RocketBounds();
+            BoxCollider box = gameObject.AddComponent<BoxCollider>();
+            box.center = transform.InverseTransformPoint(bounds.center);
+            box.size = bounds.size;
 
-            Quaternion noseDown = startRotation * Quaternion.Euler(0f, 0f, 180f);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, noseDown, flipSpeed * dt);
-            transform.position = startPosition + Vector3.up * altitude * visualScale;
-            GameState.SetAltitude(altitude);
+            body = gameObject.AddComponent<Rigidbody>();
+            body.linearDamping = fallDrag;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-            if (altitude <= landingAltitude)
+            // Keeps the rocket flat to the camera: it moves left, right, up and down and only spins facing us.
+            body.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
+
+            float side = Random.value < 0.5f ? -1f : 1f;
+            body.linearVelocity = Vector3.right * Random.Range(-pushSpeed, pushSpeed);
+            body.angularVelocity = Vector3.forward * side * Random.Range(0.5f, 1f) * spinSpeed;
+        }
+
+        // Shows the falling rocket's height above the pad on the altitude counter.
+        void ShowFallAltitude()
+        {
+            GameState.SetAltitude(Mathf.Max(0f, (transform.position.y - startPosition.y) / visualScale));
+        }
+
+        // Tells everyone the rocket landed the first time the falling rocket hits something.
+        void OnCollisionEnter(Collision collision)
+        {
+            if (body == null || landed) return;
+
+            landed = true;
+            GameState.Land();
+        }
+
+        // Removes the physics and puts the rocket back on the pad with full fuel, ready for the next launch.
+        // Called by the result popup's Continue button.
+        public void ResetToPad()
+        {
+            landed = false;
+            if (body != null)
             {
-                falling = false;
-                Invoke(nameof(ResetToPad), resetDelay);
+                // Removed right away, so physics cannot move the rocket after it is put back.
+                DestroyImmediate(body);
+                DestroyImmediate(GetComponent<BoxCollider>());
+                body = null;
             }
-        }
 
-        // Puts the rocket back on the pad with full fuel, ready for the next launch.
-        void ResetToPad()
-        {
-            falling = false;
             transform.position = startPosition;
             transform.rotation = startRotation;
             GameState.SetFuel(1f);

@@ -32,8 +32,7 @@ namespace RocketToTheMoon.Core
         PartData dragData;
         GameObject preview;
         SnapPoint previewSnap;
-        GameObject mirrorPreview;
-        SnapPoint mirrorSnap;
+        int previewStep = -1;
         bool movingPlaced;
         float iconPixels;
         Texture2D shownCursor;
@@ -96,21 +95,24 @@ namespace RocketToTheMoon.Core
             return !IsOverUI() && PartUnder(position) != null;
         }
 
-        // Lifts a placed part (with everything attached to it) off the rocket. A fin brings its pair along.
+        // Lifts a placed part (with everything attached to it) off the rocket.
         void PickUp(RocketPart part)
         {
             dragData = part.data;
             iconPixels = 0f;
             preview = Lift(part);
-            if (part.pair != null) mirrorPreview = Lift(part.pair);
             movingPlaced = true;
         }
 
-        // Frees the snap points a placed part was using and tints it like a store preview.
+        // Frees the snap point (or fin step) a placed part was using and tints it like a store preview.
         GameObject Lift(RocketPart part)
         {
             SnapPoint snap = part.attachedTo;
-            if (snap != null)
+            if (snap != null && part.step >= 0)
+            {
+                snap.takenSteps[part.step] = false;
+            }
+            else if (snap != null)
             {
                 snap.taken = false;
                 SnapPoint ownSnap = OwnSnap(part.gameObject, Opposite(snap.side));
@@ -118,6 +120,7 @@ namespace RocketToTheMoon.Core
             }
 
             part.attachedTo = null;
+            part.step = -1;
             part.transform.SetParent(transform);
             Tint(part.gameObject, true);
             return part.gameObject;
@@ -150,18 +153,15 @@ namespace RocketToTheMoon.Core
             return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
         }
 
-        // Creates a hidden, tinted copy of the part to drag around. Fins come in pairs, so they get a second copy.
+        // Creates a hidden, tinted copy of the part to drag around.
         // Called when a store card starts dragging. iconHeight is the card picture's height in pixels, so the part can appear at that size.
         public void StartDrag(PartData data, float iconHeight)
         {
-            bool isFin = data.Type == PartType.Fin;
-            int newParts = isFin ? 2 : 1;
-            if (GameState.IsFlying || PartCount() + newParts > maxParts || !CanAdd(data)) return;
+            if (GameState.IsFlying || PartCount() >= maxParts || !CanAdd(data)) return;
 
             dragData = data;
             iconPixels = iconHeight;
             preview = CreatePreview(data);
-            if (isFin) mirrorPreview = CreatePreview(data);
         }
 
         // Moves the dragged part a bit closer to its goal: the closest free snap point, or the cursor when none is close enough.
@@ -174,51 +174,37 @@ namespace RocketToTheMoon.Core
                 return;
             }
 
-            // Where the parts are now. A part that was hidden starts at the cursor.
+            // Where the part is now. A part that was hidden starts at the cursor.
             bool wasShown = preview.activeSelf;
             Pose from = wasShown ? new Pose(preview.transform.position, preview.transform.rotation) : new Pose(CursorPoint(cursor), transform.rotation);
             float fromSize = preview.transform.localScale.x;
-            bool mirrorWasShown = mirrorPreview != null && mirrorPreview.activeSelf;
-            Pose mirrorFrom = mirrorWasShown ? new Pose(mirrorPreview.transform.position, mirrorPreview.transform.rotation) : from;
-            float mirrorFromSize = mirrorWasShown ? mirrorPreview.transform.localScale.x : fromSize;
 
-            // Put the parts at their goal at normal size.
+            // Put the part at its goal at normal size.
             Hide();
-            previewSnap = ClosestSnap(cursor);
+            previewSnap = ClosestSnap(cursor, out previewStep);
             if (previewSnap != null) Snap();
             else Float(cursor, from.position);
 
             // A part that just appeared is as big as the store picture.
             if (!wasShown) fromSize = AppearSize();
-            if (!mirrorWasShown) mirrorFromSize = fromSize;
 
             Ease(preview, from, fromSize);
-            if (mirrorPreview != null && mirrorPreview.activeSelf) Ease(mirrorPreview, mirrorFrom, mirrorFromSize);
         }
 
-        // Hides the dragged parts and lets the rocket sit back on the pad without them.
+        // Hides the dragged part and lets the rocket sit back on the pad without it.
         void Hide()
         {
             preview.SetActive(false);
-            if (mirrorPreview != null) mirrorPreview.SetActive(false);
             previewSnap = null;
-            mirrorSnap = null;
+            previewStep = -1;
             SitOnPad();
         }
 
-        // Puts the dragged part (and its mirror fin on the other side) on the chosen snap point.
+        // Puts the dragged part on the chosen snap point (or fin step).
         void Snap()
         {
-            PlaceAt(preview, previewSnap);
+            PlaceAt(preview, previewSnap, previewStep);
             preview.SetActive(true);
-
-            if (mirrorPreview != null)
-            {
-                mirrorSnap = MirrorSnap(previewSnap);
-                PlaceAt(mirrorPreview, mirrorSnap);
-                mirrorPreview.SetActive(true);
-            }
-
             SitOnPad();
         }
 
@@ -300,23 +286,14 @@ namespace RocketToTheMoon.Core
             return preview.transform.localScale.x * iconPixels / partPixels;
         }
 
-        // Keeps the preview (and its mirror fin) as real parts if they are on a snap point, otherwise removes them.
+        // Keeps the preview as a real part if it is on a snap point, otherwise removes it.
         public void EndDrag()
         {
             if (preview == null) return;
 
             if (previewSnap != null)
             {
-                Keep(preview, previewSnap);
-                if (mirrorPreview != null)
-                {
-                    Keep(mirrorPreview, mirrorSnap);
-                    RocketPart first = preview.GetComponent<RocketPart>();
-                    RocketPart second = mirrorPreview.GetComponent<RocketPart>();
-                    first.pair = second;
-                    second.pair = first;
-                    StartCoroutine(Pop(mirrorPreview.transform));
-                }
+                Keep(preview, previewSnap, previewStep);
                 SitOnPad();
                 StartCoroutine(Pop(preview.transform));
                 if (snapClick != null) audioSource.PlayOneShot(snapClick);
@@ -324,13 +301,11 @@ namespace RocketToTheMoon.Core
             else
             {
                 Destroy(preview);
-                if (mirrorPreview != null) Destroy(mirrorPreview);
             }
 
             preview = null;
             previewSnap = null;
-            mirrorPreview = null;
-            mirrorSnap = null;
+            previewStep = -1;
             movingPlaced = false;
             Changed?.Invoke();
         }
@@ -349,10 +324,10 @@ namespace RocketToTheMoon.Core
             if (part != null && !IsDragged(part)) part.localScale = Vector3.one;
         }
 
-        // Returns true if the part is one of the parts being dragged.
+        // Returns true if the part is the one being dragged.
         bool IsDragged(Transform part)
         {
-            return part.gameObject == preview || part.gameObject == mirrorPreview;
+            return part.gameObject == preview;
         }
 
         // Creates a hidden, tinted copy of a part.
@@ -364,40 +339,73 @@ namespace RocketToTheMoon.Core
             return part;
         }
 
-        // Turns a preview into a real part: exactly on its snap point at normal size, normal colours, and its snap points are marked as taken.
-        void Keep(GameObject part, SnapPoint snap)
+        // Turns a preview into a real part: exactly on its snap point (or fin step) at normal size, normal colours, and marks what it uses as taken.
+        void Keep(GameObject part, SnapPoint snap, int step)
         {
-            PlaceAt(part, snap);
+            PlaceAt(part, snap, step);
             Tint(part, false);
-            snap.taken = true;
-            part.GetComponent<RocketPart>().attachedTo = snap;
+            RocketPart rocketPart = part.GetComponent<RocketPart>();
+            rocketPart.attachedTo = snap;
+            rocketPart.step = step;
+
+            if (step >= 0)
+            {
+                snap.takenSteps[step] = true;
+                return;
+            }
 
             // The part's own facing point is now taken too. Not on the pad: the body's bottom stays free for parts below it.
+            snap.taken = true;
             SnapPoint ownSnap = OwnSnap(part, Opposite(snap.side));
             if (ownSnap != null && snap != padSnap) ownSnap.taken = true;
         }
 
         // Finds the free snap point that accepts the dragged part and is closest to the cursor on screen.
-        SnapPoint ClosestSnap(Vector2 screenPosition)
+        // On a side line it also picks the closest free height step (step is -1 for normal points).
+        SnapPoint ClosestSnap(Vector2 screenPosition, out int step)
         {
             SnapPoint closest = null;
             float closestDistance = maxSnapDistance;
+            step = -1;
 
             foreach (SnapPoint snap in GetComponentsInChildren<SnapPoint>())
             {
-                if (snap.taken || !Accepts(snap, dragData.Type)) continue;
-                if (mirrorPreview != null && MirrorSnap(snap) == null) continue;
+                if (!Accepts(snap, dragData.Type)) continue;
 
-                Vector2 snapOnScreen = Camera.main.WorldToScreenPoint(snap.transform.position);
-                float distance = Vector2.Distance(snapOnScreen, screenPosition);
-                if (distance < closestDistance)
+                if (snap.IsLine)
                 {
-                    closest = snap;
-                    closestDistance = distance;
+                    for (int i = 0; i < SnapPoint.LineSteps; i++)
+                    {
+                        if (snap.takenSteps[i]) continue;
+                        float distance = ScreenDistance(snap.StepPosition(i), screenPosition);
+                        if (distance < closestDistance)
+                        {
+                            closest = snap;
+                            closestDistance = distance;
+                            step = i;
+                        }
+                    }
+                }
+                else if (!snap.taken)
+                {
+                    float distance = ScreenDistance(snap.transform.position, screenPosition);
+                    if (distance < closestDistance)
+                    {
+                        closest = snap;
+                        closestDistance = distance;
+                        step = -1;
+                    }
                 }
             }
 
             return closest;
+        }
+
+        // How far a point in the world is from a screen position, in pixels.
+        static float ScreenDistance(Vector3 worldPoint, Vector2 screenPosition)
+        {
+            Vector2 onScreen = Camera.main.WorldToScreenPoint(worldPoint);
+            return Vector2.Distance(onScreen, screenPosition);
         }
 
         // Returns true if a part of this type can attach to the snap point. The pad only takes a body.
@@ -408,12 +416,14 @@ namespace RocketToTheMoon.Core
             return owner.data.Accepts(snap.side, type);
         }
 
-        // Puts a part on a snap point at normal size. If the part has a snap point on the opposite side, that point lines up with it.
-        static void PlaceAt(GameObject part, SnapPoint snap)
+        // Puts a part on a snap point at normal size. A fin goes to its height step on the side line.
+        // If the part has a snap point on the opposite side, that point lines up with it.
+        static void PlaceAt(GameObject part, SnapPoint snap, int step)
         {
+            Vector3 position = step >= 0 ? snap.StepPosition(step) : snap.transform.position;
             part.transform.SetParent(snap.transform.parent);
             part.transform.localScale = Vector3.one;
-            part.transform.SetPositionAndRotation(snap.transform.position, snap.transform.rotation);
+            part.transform.SetPositionAndRotation(position, snap.transform.rotation);
 
             SnapPoint ownSnap = OwnSnap(part, Opposite(snap.side));
             if (ownSnap != null)
@@ -427,13 +437,6 @@ namespace RocketToTheMoon.Core
                 if (snap.side == side && snap.transform.parent == part.transform)
                     return snap;
             return null;
-        }
-
-        // Finds the free snap point on the other side of the same part (left and right), or null if there is none.
-        static SnapPoint MirrorSnap(SnapPoint snap)
-        {
-            SnapPoint other = OwnSnap(snap.transform.parent.gameObject, Opposite(snap.side));
-            return other != null && !other.taken ? other : null;
         }
 
         // The side that faces the given one (top faces bottom, left faces right).

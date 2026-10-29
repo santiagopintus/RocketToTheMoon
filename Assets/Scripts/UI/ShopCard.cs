@@ -48,7 +48,7 @@ namespace RocketToTheMoon.UI
             builder.Changed += Refresh;
             icon.sprite = data.icon;
             icon.enabled = data.icon != null;
-            nameLabel.text = data.partName;
+            nameLabel.text = data.partName + " <size=70%>T" + data.tier + "</size>";
             statsLabel.text = StatsText(data);
             Refresh();
         }
@@ -100,32 +100,43 @@ namespace RocketToTheMoon.UI
 
         // Shows the price and Buy button, or "OWNED" and a Sell button. A part on the rocket cannot be sold.
         // Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text.
+        // Parts not reached yet are greyed out and say which altitude unlocks them.
         void Refresh()
         {
             if (part == null) return;
 
             bool owned = PlayerSession.IsUnlocked(part.id);
             bool canAfford = PlayerSession.Credits >= part.price;
-            bool blocked = !builder.CanAdd(part);
+            bool available = PlayerSession.IsAvailable(part);
+            bool blocked = !builder.CanAdd(part) || !available;
 
             icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
             nameLabel.color = blocked ? Palette.Teal : nameColor;
 
-            priceLabel.text = owned ? (blocked ? "<size=70%>BODY FIRST</size>" : "OWNED") : part.price + " cr";
-            priceLabel.color = owned ? Palette.LightTeal : canAfford ? Palette.Moonlight : Palette.Teal;
+            if (!available && !owned) priceLabel.text = "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
+            else if (owned) priceLabel.text = blocked ? "<size=70%>BODY FIRST</size>" : "OWNED";
+            else priceLabel.text = part.price + " cr";
+
+            priceLabel.color = owned ? Palette.LightTeal : canAfford && available ? Palette.Moonlight : Palette.Teal;
             buttonLabel.text = owned ? "SELL" : "BUY";
-            buyButton.interactable = owned ? !builder.IsUsed(part) : canAfford;
+            buyButton.interactable = owned ? !builder.IsUsed(part) : canAfford && available;
         }
 
-        // Writes the numbers that matter for this kind of part.
+        // Writes the numbers that matter for this kind of part. Masses in grams.
         static string StatsText(PartData data)
         {
-            string text = "Mass " + data.mass + " kg";
+            string text = "Mass " + Grams(data.mass);
             if (data is ThrusterData thruster)
-                text += "\nThrust " + thruster.thrust + " N\nBurn " + thruster.fuelPerSecond + " fuel/s";
+                text += "\nThrust " + thruster.thrust.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " N\nBurn " + Grams(thruster.fuelPerSecond) + "/s";
             if (data is FuelTankData tank)
-                text += "\nFuel " + tank.fuelCapacity;
+                text += "\nFuel " + Grams(tank.fuelCapacity);
             return text;
+        }
+
+        // A mass in kg written as whole grams.
+        static string Grams(float kg)
+        {
+            return Mathf.RoundToInt(kg * 1000f) + " g";
         }
     }
 }

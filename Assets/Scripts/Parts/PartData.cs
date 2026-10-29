@@ -10,7 +10,16 @@ namespace RocketToTheMoon.Core
         public Sprite icon;
         public GameObject prefab;
         public int price;
-        public float mass = 1f;
+
+        // Better parts have a higher tier. The part shows up in the store once the best altitude reaches unlockAltitude.
+        public int tier = 1;
+        public float unlockAltitude;
+
+        // Physics, in real units. Mass in kg. Drag area (m^2) slows the rocket down.
+        // Side area (m^2) is how hard the air pushes the part sideways when the rocket flies at an angle.
+        public float mass = 0.02f;
+        public float dragArea = 0.0002f;
+        public float sideArea;
 
         // The kind of part this is. Each part class sets it.
         public abstract PartType Type { get; }

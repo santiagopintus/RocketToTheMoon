@@ -17,5 +17,9 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 72b21be00981b75468765f917c527ef8, type: 3}
   prefab: {fileID: 7956281813477704838, guid: a90884800afc9da44a71b0a2ce09bb01, type: 3}
   price: 250
-  mass: 55
-  fuelCapacity: 140
+  mass: 0.035
+  fuelCapacity: 0.08
+  tier: 1
+  unlockAltitude: 50
+  dragArea: 0.0003
+  sideArea: 0.0004

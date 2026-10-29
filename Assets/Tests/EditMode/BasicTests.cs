@@ -29,25 +29,37 @@ namespace RocketToTheMoon.Tests
             Assert.AreEqual(PlayerSession.MaxNameLength, result.Length);
         }
 
+        // A background is hidden below its start altitude, half shown halfway, and fully shown from its full altitude.
+        [Test]
+        public void Background_FadesBetweenStartAndFull()
+        {
+            Assert.AreEqual(0f, BackgroundManager.TargetAlpha(250f, 350f, 100f));
+            Assert.AreEqual(0.5f, BackgroundManager.TargetAlpha(250f, 350f, 300f), 0.001f);
+            Assert.AreEqual(1f, BackgroundManager.TargetAlpha(250f, 350f, 500f));
+            Assert.AreEqual(1f, BackgroundManager.TargetAlpha(0f, 0f, 0f));
+        }
+
         // Rocket stats add up mass, thrust and fuel, and thrust/weight uses the full mass.
         [Test]
         public void RocketStats_AddsPartsAndThrustToWeight()
         {
             var thruster = UnityEngine.ScriptableObject.CreateInstance<ThrusterData>();
-            thruster.mass = 50f;
-            thruster.thrust = 2000f;
+            thruster.mass = 0.05f;
+            thruster.thrust = 2f;
+            thruster.fuelPerSecond = 0.05f;
             var tank = UnityEngine.ScriptableObject.CreateInstance<FuelTankData>();
-            tank.mass = 50f;
-            tank.fuelCapacity = 100f;
+            tank.mass = 0.05f;
+            tank.fuelCapacity = 0.1f;
 
             var stats = new RocketStats();
             stats.Add(thruster);
             stats.Add(tank);
 
             Assert.AreEqual(2, stats.PartCount);
-            Assert.AreEqual(100f, stats.DryMass);
-            Assert.AreEqual(200f, stats.FullMass(1f));
-            Assert.AreEqual(1f, stats.ThrustToWeight(stats.FullMass(1f), 10f), 0.0001f);
+            Assert.AreEqual(0.1f, stats.DryMass, 0.0001f);
+            Assert.AreEqual(0.2f, stats.FullMass, 0.0001f);
+            Assert.AreEqual(2f, stats.BurnTime, 0.0001f);
+            Assert.AreEqual(1f, stats.ThrustToWeight(stats.FullMass, 10f), 0.0001f);
         }
 
         // Both scenes must be enabled in the build, or the web build has no game.

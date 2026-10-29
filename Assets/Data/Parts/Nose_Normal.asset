@@ -17,4 +17,8 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c164ba9863a97464fa39be4ce4f4cc68, type: 3}
   prefab: {fileID: 2764932729413902638, guid: 975d8304f06b42144829c862518bc624, type: 3}
   price: 40
-  mass: 40
+  mass: 0.03
+  tier: 1
+  unlockAltitude: 0
+  dragArea: 0.0018
+  sideArea: 0.0008

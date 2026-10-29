@@ -6,11 +6,12 @@ using UnityEngine.UI;
 
 namespace RocketToTheMoon.UI
 {
-    /// <summary>Shows the player name, credits and a menu button in the game scene.</summary>
+    /// <summary>Shows the player name, credits, best altitude and a menu button in the game scene.</summary>
     public class GameHud : MonoBehaviour
     {
         [SerializeField] TMP_Text playerNameLabel;
         [SerializeField] TMP_Text creditsLabel;
+        [SerializeField] TMP_Text bestLabel;
         [SerializeField] Button menuButton;
 
         // Shows the player name and connects the menu button.
@@ -38,10 +39,12 @@ namespace RocketToTheMoon.UI
             PlayerSession.CreditsChanged -= ShowCredits;
         }
 
-        // Writes the player's credits.
+        // Writes the player's credits and best altitude.
+        // After a flight the best altitude is saved before the credits change, so a new record shows here too.
         void ShowCredits()
         {
             if (creditsLabel != null) creditsLabel.text = PlayerSession.Credits + " credits";
+            if (bestLabel != null) bestLabel.text = "Best " + PlayerSession.BestAltitude.ToString("0") + " m";
         }
     }
 }

@@ -17,6 +17,10 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 494e14e307ff2214497f980d1a7701fb, type: 3}
   prefab: {fileID: 2476712777969615032, guid: cfd7f52d61e49294094c9a3a4618d800, type: 3}
   price: 450
-  mass: 75
-  thrust: 6500
-  fuelPerSecond: 3
+  mass: 0.04
+  thrust: 24
+  fuelPerSecond: 0.05
+  tier: 2
+  unlockAltitude: 150
+  dragArea: 0.0003
+  sideArea: 0.0003

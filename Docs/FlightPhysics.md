@@ -43,12 +43,12 @@ The flight simulator turns every placed part into a `FlightPart`:
 
 So where the player places a part is exactly what the physics uses.
 
-### Each step (fixed `dt = 0.01 s`)
+### Each step (fixed `dt = 0.005 s`)
 
 1. **Fuel.** If any fuel is left, thrusters burn `fuelPerSecond` in total, taken from all tanks evenly.
 2. **Mass and centre of mass.** `m = sum(mass + fuel)`. `CoM = sum(m_i * position_i) / m`. It moves as fuel burns.
-3. **Inertia** (how hard it is to rotate). `I = sum(m_i * distance_i^2)` from the centre of mass, plus a small minimum.
-4. **Air.** `vAir = velocity - wind`. Rocket axis `a = (-sin theta, cos theta)`, sideways `n = (cos theta, sin theta)`.
+3. **Inertia** (how hard it is to rotate). `I = sum(m_i * distance_i^2 + m_i * length_i^2 / 12)` from the centre of mass.
+4. **Air.** Each part meets the air at `vAir = velocity + spin x r - wind` (the spin part is what calms wobbling down). Rocket axis `a = (-sin theta, cos theta)`, sideways `n = (cos theta, sin theta)`.
 5. **Forces on each part**, applied at the part's position:
    - Drag: `-0.5 * rho * |vAir| * vAir * dragArea` (against the motion).
    - Side force: `-0.5 * rho * |vAir| * (vAir . n) * sideArea * n` (pushes the part back in line with the air flow).
@@ -74,8 +74,10 @@ For the first `railLength` metres (about 1 m) the rocket can only move straight 
 ### Start, end and score
 
 - On the pad, if thrust is less than weight the rocket does not move.
-- The flight ends when the rocket comes back down to `y = 0`, or when it runs out of time.
-- Score = highest `y` reached.
+- Altitude is the height of the centre of mass above where it started.
+- The flight ends (credits and result popup) when the rocket falls back to 70% of its highest altitude, hits the ground, never lifts off, or runs out of time (120 s). After the popup the sim keeps running so the rocket falls to the ground.
+- Score = highest altitude reached.
+- A rocket without a nose gets extra drag (`noNoseDrag`) at its flat top.
 
 ### Speed-up and skip
 
@@ -109,12 +111,26 @@ All parts (`PartData`): `mass`, `dragArea`, `sideArea`, `price`, `tier`, `unlock
 | Thruster | thrust vs burn time | Punchy (strong, short), Sipper (weak, long) |
 | Body | mass vs length (more room for fins) | Short, long |
 
-Higher tiers raise all numbers at once (real improvements).
+Higher tiers raise all numbers at once (real improvements). For thrusters that means more push per gram of fuel (thrust / fuelPerSecond), not just more thrust: a stronger thruster that burns fuel as fast is no better.
+
+### Current numbers (tier 1 starter: small thruster, normal tank, short body, normal nose, small fins)
+
+| Part | Mass (g) | Drag area | Side area | Other | Unlock |
+|---|---|---|---|---|---|
+| Body Short / Long | 60 / 90 | 0.0003 / 0.0005 | 0.0006 / 0.001 | | 0 m |
+| Nose Normal / Sharp | 30 / 40 | 0.0018 / 0.001 | 0.0008 / 0.0006 | | 0 m |
+| Fin Small / Large | 8 / 16 | 0.0002 / 0.0005 | 0.004 / 0.008 | | 0 m |
+| Tank Normal / Large | 20 / 35 | 0.0002 / 0.0003 | 0.0003 / 0.0004 | fuel 40 g / 80 g | 0 m / 50 m |
+| Thruster Small (T1) | 25 | 0.0003 | 0.0003 | 12 N, 40 g/s | 0 m |
+| Thruster Medium (T2) | 40 | 0.0003 | 0.0003 | 24 N, 50 g/s | 150 m |
+| Thruster Large (T3) | 60 | 0.0004 | 0.0004 | 45 N, 70 g/s | 300 m |
+
+The `BalanceReport` EditMode test prints the average altitude of several rockets (5 winds each) to the test results. Run it after changing numbers. Last run: starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, T3 with two large tanks 373 m.
 
 ## Fins: one at a time, 10 height steps
 
 - No more fin pairs or mirror logic. Each fin is placed alone, on the left or right.
-- Bodies and tanks get a `SnapLine` on each side instead of a side snap point: two end points covering the part's full height.
+- The existing left and right snap points of bodies and tanks act as lines: same x as the point, covering the part's full mesh height (worked out at runtime, no prefab changes).
 - Each line is split into **10 evenly spaced steps**. While dragging, the fin follows the cursor and snaps to the closest free step. The same steps on both sides make it easy to match left and right fins.
 - One fin per step. Lopsided placements are allowed (and teach the player why they curve).
 - Saved in the rocket design as: the part it is on, side, step index (0 - 9).
@@ -123,20 +139,16 @@ Higher tiers raise all numbers at once (real improvements).
 
 - `unlockAltitude` on each part. A part appears in the store once the best altitude reaches it, then the player buys it with credits.
 - "Available" (reached the altitude) is different from "owned" (bought, what `PlayerSession.IsUnlocked` means today).
-- Example: 2 of each part type at 0 m, one more of each at 30 m, 50 m and 75 m, the first tier 2 parts from about 150 m.
-- The next locked part can show greyed out with "Reach 50 m" so players have a goal.
+- The best altitude is saved in `PlayerSession.BestAltitude` (PlayerPrefs for now, the cloud profile in Sprint 3).
+- Goal: 2 of each part type at 0 m, one more of each at 30 m, 50 m and 75 m, the first tier 2 parts from about 150 m. Today only the existing 11 parts exist (see the table above).
+- Locked parts show greyed out with "REACH 50 m" so players have a goal. The store sorts cards by unlock altitude, then price, and shows the tier next to the name.
 
 ## Build order
 
 0. **Done.** Removed the part-scaling code. Kept "body first" and the greyed-out cards.
-1. **Part data.** Add `dragArea`, `sideArea`, `tier`, `unlockAltitude`. Fuel in kg. Set tier 1 numbers on the existing assets.
-2. **`RocketSim` + EditMode tests:**
-   - same seed gives the same altitude,
-   - a balanced tier 1 rocket reaches about 100 m,
-   - fins at the bottom fly higher than fins at the top,
-   - fins on one side only make the rocket drift sideways,
-   - not enough thrust stays on the pad.
-3. **`FlightSimulator` uses `RocketSim`.** Position and rotation on screen, camera follows sideways, random seed per launch, speed-up and skip.
-4. **Fin snap lines.** Remove mirror logic, add `SnapLine` with 10 steps, one fin per step.
-5. **Store unlocks by altitude** and tier labels on the cards.
-6. **Later:** centre of mass and centre of pressure markers with a stability readout while building, tank fill slider, tier 2 parts.
+1. **Done.** Part data: `dragArea`, `sideArea`, `tier`, `unlockAltitude`, fuel in kg, real numbers on the 11 assets.
+2. **Done.** `RocketSim` + EditMode tests (same seed same flight, starter about 100 m, low fins beat high fins, no wind flies straight, one fin drifts, too heavy stays on the pad, balance report).
+3. **Done, except speed-up and skip.** `FlightSimulator` uses `RocketSim`: position and rotation on screen, camera follows sideways, random seed per launch. `RocketSim.RunToEnd()` is ready for a skip button.
+4. **Done.** Fins: no more pairs. Left and right snap points are lines with 10 steps (`SnapPoint.IsLine`, `StepPosition`), worked out from the part's mesh height, one fin per step.
+5. **Done.** Store unlocks by best altitude and tier labels on the cards.
+6. **Next:** speed-up and skip buttons, centre of mass and centre of pressure markers with a stability readout while building, more tier 1 variants (new models), tank fill slider.

@@ -5,15 +5,23 @@ using UnityEngine.InputSystem;
 
 namespace RocketToTheMoon.Core
 {
-    // Lets the player build the rocket. A part dragged from the store snaps to the closest free snap point and stays there when dropped.
+    // Lets the player build the rocket. A part dragged from the store floats under the cursor, glides onto the closest free snap point and stays there when dropped.
     // A placed part can be dragged too: drop it on another free snap point to move it, or away from the rocket to remove it.
     public class RocketBuilder : MonoBehaviour
     {
         [SerializeField] float maxSnapDistance = 150f;
         [SerializeField] int maxParts = 12;
+        [SerializeField] float followSpeed = 15f;
+        [SerializeField] float tiltPerMetre = 200f;
+        [SerializeField] float maxTilt = 20f;
+        [SerializeField] Texture2D openHand;
+        [SerializeField] Texture2D closedHand;
 
         // Called every time a part is added, moved or removed.
         public event Action Changed;
+
+        // The store card under the cursor, or null. Set by the store cards.
+        public PartData HoveredCard { get; set; }
 
         SnapPoint padSnap;
         PartData dragData;
@@ -22,6 +30,8 @@ namespace RocketToTheMoon.Core
         GameObject mirrorPreview;
         SnapPoint mirrorSnap;
         bool movingPlaced;
+        float iconPixels;
+        Texture2D shownCursor;
 
         // Creates the snap point on the pad where the first body goes.
         void Awake()
@@ -31,32 +41,57 @@ namespace RocketToTheMoon.Core
             padSnap.side = SnapSide.Top;
         }
 
-        // Picks up a placed part when the player presses on it, and moves or drops it until they let go.
+        // Moves the dragged part every frame, picks up a placed part when the player presses on it, and updates the hand cursor.
         void Update()
         {
             Pointer pointer = Pointer.current;
             if (pointer == null) return;
             Vector2 position = pointer.position.ReadValue();
 
-            if (movingPlaced)
+            if (preview != null)
             {
-                if (pointer.press.isPressed) Drag(position);
-                else EndDrag();
+                if (movingPlaced && !pointer.press.isPressed) EndDrag();
+                else Move(position);
             }
-            else if (pointer.press.wasPressedThisFrame && preview == null && !GameState.IsFlying && !IsOverUI())
+            else if (pointer.press.wasPressedThisFrame && !GameState.IsFlying && !IsOverUI())
             {
                 RocketPart part = PartUnder(position);
-                if (part == null) return;
-
-                PickUp(part);
-                Drag(position);
+                if (part != null)
+                {
+                    PickUp(part);
+                    Move(position);
+                }
             }
+
+            UpdateCursor(position);
+        }
+
+        // Shows a closed hand while dragging, an open hand over something that can be grabbed, and the normal arrow otherwise.
+        void UpdateCursor(Vector2 position)
+        {
+            Texture2D wanted = null;
+            if (preview != null) wanted = closedHand;
+            else if (CanGrab(position)) wanted = openHand;
+            if (wanted == shownCursor) return;
+
+            shownCursor = wanted;
+            Vector2 hotspot = wanted != null ? new Vector2(wanted.width, wanted.height) / 2f : Vector2.zero;
+            Cursor.SetCursor(wanted, hotspot, CursorMode.Auto);
+        }
+
+        // Returns true if the cursor is over an owned store card or a placed part.
+        bool CanGrab(Vector2 position)
+        {
+            if (GameState.IsFlying) return false;
+            if (HoveredCard != null) return PlayerSession.IsUnlocked(HoveredCard.id);
+            return !IsOverUI() && PartUnder(position) != null;
         }
 
         // Lifts a placed part (with everything attached to it) off the rocket. A fin brings its pair along.
         void PickUp(RocketPart part)
         {
             dragData = part.data;
+            iconPixels = 0f;
             preview = Lift(part);
             if (part.pair != null) mirrorPreview = Lift(part.pair);
             movingPlaced = true;
@@ -107,37 +142,72 @@ namespace RocketToTheMoon.Core
         }
 
         // Creates a hidden, tinted copy of the part to drag around. Fins come in pairs, so they get a second copy.
-        // Called when a store card starts dragging.
-        public void StartDrag(PartData data)
+        // Called when a store card starts dragging. iconHeight is the card picture's height in pixels, so the part can appear at that size.
+        public void StartDrag(PartData data, float iconHeight)
         {
             bool isFin = data.Type == PartType.Fin;
             int newParts = isFin ? 2 : 1;
             if (GameState.IsFlying || PartCount() + newParts > maxParts) return;
 
             dragData = data;
+            iconPixels = iconHeight;
             preview = CreatePreview(data);
             if (isFin) mirrorPreview = CreatePreview(data);
         }
 
-        // Shows the preview on the free snap point closest to the cursor, or hides it if none is close enough.
-        public void Drag(Vector2 screenPosition)
+        // Moves the dragged part a bit closer to its goal: the closest free snap point, or the cursor when none is close enough.
+        // Over the store (or any other UI) the part stays hidden, as if it was still on the shelf.
+        void Move(Vector2 cursor)
         {
-            if (preview == null) return;
+            if (IsOverUI())
+            {
+                Hide();
+                return;
+            }
 
-            // Pick the snap point while the preview is hidden, so the preview moving the rocket does not change the choice.
+            // Where the parts are now. A part that was hidden starts at the cursor.
+            bool wasShown = preview.activeSelf;
+            Pose from = wasShown ? new Pose(preview.transform.position, preview.transform.rotation) : new Pose(CursorPoint(cursor), transform.rotation);
+            float fromSize = preview.transform.localScale.x;
+            bool mirrorWasShown = mirrorPreview != null && mirrorPreview.activeSelf;
+            Pose mirrorFrom = mirrorWasShown ? new Pose(mirrorPreview.transform.position, mirrorPreview.transform.rotation) : from;
+            float mirrorFromSize = mirrorWasShown ? mirrorPreview.transform.localScale.x : fromSize;
+
+            // Put the parts at their goal at normal size.
+            Hide();
+            previewSnap = ClosestSnap(cursor);
+            if (previewSnap != null) Snap();
+            else Float(cursor, from.position);
+
+            // A part that just appeared is as big as the store picture.
+            if (!wasShown) fromSize = AppearSize();
+            if (!mirrorWasShown) mirrorFromSize = fromSize;
+
+            Ease(preview, from, fromSize);
+            if (mirrorPreview != null && mirrorPreview.activeSelf) Ease(mirrorPreview, mirrorFrom, mirrorFromSize);
+        }
+
+        // Hides the dragged parts and lets the rocket sit back on the pad without them.
+        void Hide()
+        {
             preview.SetActive(false);
             if (mirrorPreview != null) mirrorPreview.SetActive(false);
+            previewSnap = null;
+            mirrorSnap = null;
             SitOnPad();
-            previewSnap = ClosestSnap(screenPosition);
-            if (previewSnap == null) return;
+        }
 
+        // Puts the dragged part (and its mirror fin on the other side) on the chosen snap point.
+        void Snap()
+        {
+            preview.transform.localScale = Vector3.one;
             PlaceAt(preview, previewSnap);
             preview.SetActive(true);
 
-            // The second fin goes on the other side of the same part.
             if (mirrorPreview != null)
             {
                 mirrorSnap = MirrorSnap(previewSnap);
+                mirrorPreview.transform.localScale = Vector3.one;
                 PlaceAt(mirrorPreview, mirrorSnap);
                 mirrorPreview.SetActive(true);
             }
@@ -145,12 +215,60 @@ namespace RocketToTheMoon.Core
             SitOnPad();
         }
 
+        // Puts the dragged part under the cursor, tilted against the way it moves so it feels like it has weight.
+        void Float(Vector2 cursor, Vector3 from)
+        {
+            Transform cam = Camera.main.transform;
+            Vector3 point = CursorPoint(cursor);
+            float lag = Vector3.Dot(point - from, cam.right);
+            float angle = Mathf.Clamp(-lag * tiltPerMetre, -maxTilt, maxTilt);
+
+            preview.transform.SetParent(transform);
+            preview.transform.localScale = Vector3.one;
+            preview.transform.SetPositionAndRotation(point, Quaternion.AngleAxis(angle, cam.forward) * transform.rotation);
+            preview.SetActive(true);
+        }
+
+        // Moves a part from where it was a bit towards where it is now (its goal), and grows it towards normal size.
+        void Ease(GameObject part, Pose from, float fromSize)
+        {
+            float t = followSpeed * Time.deltaTime;
+            Transform goal = part.transform;
+            goal.SetPositionAndRotation(Vector3.Lerp(from.position, goal.position, t), Quaternion.Slerp(from.rotation, goal.rotation, t));
+            goal.localScale = Vector3.one * Mathf.Lerp(fromSize, 1f, t);
+        }
+
+        // The point under the cursor, at the rocket's distance from the camera.
+        Vector3 CursorPoint(Vector2 cursor)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(cursor);
+            Plane plane = new Plane(-Camera.main.transform.forward, transform.position);
+            plane.Raycast(ray, out float distance);
+            return ray.GetPoint(distance);
+        }
+
+        // The size that makes the dragged part look as big as its store picture (1 is normal size).
+        float AppearSize()
+        {
+            if (iconPixels <= 0f) return 1f;
+
+            Bounds bounds = new Bounds(preview.transform.position, Vector3.zero);
+            foreach (MeshRenderer r in preview.GetComponentsInChildren<MeshRenderer>())
+                bounds.Encapsulate(r.bounds);
+
+            Camera cam = Camera.main;
+            float distance = Vector3.Dot(bounds.center - cam.transform.position, cam.transform.forward);
+            float metresPerPixel = 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / Screen.height;
+            float partPixels = Mathf.Max(bounds.size.x, bounds.size.y) / metresPerPixel;
+            return iconPixels / partPixels;
+        }
+
         // Keeps the preview (and its mirror fin) as real parts if they are on a snap point, otherwise removes them.
         public void EndDrag()
         {
             if (preview == null) return;
 
-            if (preview.activeSelf)
+            if (previewSnap != null)
             {
                 Keep(preview, previewSnap);
                 if (mirrorPreview != null)
@@ -161,6 +279,7 @@ namespace RocketToTheMoon.Core
                     first.pair = second;
                     second.pair = first;
                 }
+                SitOnPad();
             }
             else
             {
@@ -185,9 +304,11 @@ namespace RocketToTheMoon.Core
             return part;
         }
 
-        // Turns a preview into a real part: normal colours, and its snap points are marked as taken.
+        // Turns a preview into a real part: exactly on its snap point at normal size, normal colours, and its snap points are marked as taken.
         void Keep(GameObject part, SnapPoint snap)
         {
+            part.transform.localScale = Vector3.one;
+            PlaceAt(part, snap);
             Tint(part, false);
             snap.taken = true;
             part.GetComponent<RocketPart>().attachedTo = snap;

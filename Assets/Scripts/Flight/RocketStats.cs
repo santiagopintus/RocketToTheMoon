@@ -1,6 +1,7 @@
 namespace RocketToTheMoon.Core
 {
     // The totals of a rocket's parts and whether it can take off. Plain C#, so the server can use it too.
+    // Masses and fuel in kg, thrust in newtons.
     public class RocketStats
     {
         public int PartCount;
@@ -24,10 +25,10 @@ namespace RocketToTheMoon.Core
         }
 
         // The mass with full tanks.
-        public float FullMass(float massPerFuel)
-        {
-            return DryMass + Fuel * massPerFuel;
-        }
+        public float FullMass => DryMass + Fuel;
+
+        // How many seconds the thrusters can burn.
+        public float BurnTime => FuelPerSecond > 0f ? Fuel / FuelPerSecond : 0f;
 
         // Thrust divided by weight for a given mass. Above 1 the rocket goes up.
         public float ThrustToWeight(float mass, float gravity)

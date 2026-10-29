@@ -9,6 +9,10 @@ namespace RocketToTheMoon.Core
 
         public int LastCredits { get; private set; }
 
+        // The best altitude before the last flight, and whether the last flight beat it.
+        public float PreviousBest { get; private set; }
+        public bool IsNewBest { get; private set; }
+
         // Starts listening for the end of the flight.
         void OnEnable()
         {
@@ -21,9 +25,13 @@ namespace RocketToTheMoon.Core
             GameState.FlightEnded -= OnFlightEnded;
         }
 
-        // Works out the reward and adds it to the player's credits.
+        // Saves the best altitude, works out the reward and adds it to the player's credits.
+        // The best altitude is saved first, so the store sees new parts when the credits change.
         void OnFlightEnded()
         {
+            PreviousBest = PlayerSession.BestAltitude;
+            IsNewBest = GameState.MaxAltitude > PreviousBest;
+            PlayerSession.ReportAltitude(GameState.MaxAltitude);
             LastCredits = Mathf.RoundToInt(GameState.MaxAltitude * creditsPerMetre);
             PlayerSession.AddCredits(LastCredits);
         }

@@ -33,6 +33,7 @@ namespace RocketToTheMoon.UI
             var culture = System.Globalization.CultureInfo.InvariantCulture;
 
             statsLabel.text =
+                PartsLine(stats.PartCount) + "\n" +
                 "Mass   " + Mathf.RoundToInt(stats.FullMass * 1000f) + " g\n" +
                 "Thrust " + stats.Thrust.ToString("0.#", culture) + " N\n" +
                 "Fuel   " + Mathf.RoundToInt(stats.Fuel * 1000f) + " g (" + stats.BurnTime.ToString("0.0", culture) + " s)\n" +
@@ -41,6 +42,14 @@ namespace RocketToTheMoon.UI
             bool ready = stats.Fuel > 0f && ratio >= 1.5f;
             hintLabel.text = Hint(stats, ratio);
             hintLabel.color = ready ? Palette.Moonlight : Palette.LightTeal;
+        }
+
+        // How many parts are used out of the maximum. Turns cream with "FULL" when no more fit.
+        string PartsLine(int count)
+        {
+            string line = "Parts  " + count + " / " + builder.MaxParts;
+            if (count < builder.MaxParts) return line;
+            return "<color=#" + ColorUtility.ToHtmlStringRGB(Palette.Moonlight) + ">" + line + "  FULL</color>";
         }
 
         // One line of advice. Thrust/weight above 1 means it goes up; it also goes up later if burning fuel makes it light enough.

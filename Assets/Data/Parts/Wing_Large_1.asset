@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4cc45bb28c97b642806bdf025d2b367, type: 3}
+  m_Name: Wing_Large_1
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.WingData
+  id: wing_large_1
+  partName: Wing Large
+  icon: {fileID: 0}
+  prefab: {fileID: 409259710324082620, guid: fd48435314fc4bd4ca52b4dc6e92f5f1, type: 3}
+  price: 0
+  mass: 20

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa0acadf4a405e47803c4dd59cd74b8, type: 3}
+  m_Name: Body_Short_1
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.BodyData
+  id: body_short_1
+  partName: Body Short
+  icon: {fileID: 0}
+  prefab: {fileID: 4215454831353977850, guid: 46f32d9f319dae742bb474f9a6654a7a, type: 3}
+  price: 0
+  mass: 75

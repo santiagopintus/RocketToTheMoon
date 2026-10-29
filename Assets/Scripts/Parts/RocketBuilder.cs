@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -14,6 +15,10 @@ namespace RocketToTheMoon.Core
         [SerializeField] float followSpeed = 15f;
         [SerializeField] float tiltPerMetre = 200f;
         [SerializeField] float maxTilt = 20f;
+        [SerializeField] float floatInFront = 0.3f;
+        [SerializeField] float popSize = 1.15f;
+        [SerializeField] float popTime = 0.15f;
+        [SerializeField] AudioClip snapClick;
         [SerializeField] Texture2D openHand;
         [SerializeField] Texture2D closedHand;
 
@@ -32,13 +37,17 @@ namespace RocketToTheMoon.Core
         bool movingPlaced;
         float iconPixels;
         Texture2D shownCursor;
+        AudioSource audioSource;
 
-        // Creates the snap point on the pad where the first body goes.
+        // Creates the snap point on the pad where the first body goes, and the audio source for the click.
         void Awake()
         {
             padSnap = new GameObject("PadSnap").AddComponent<SnapPoint>();
             padSnap.transform.SetParent(transform, false);
             padSnap.side = SnapSide.Top;
+
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
         }
 
         // Moves the dragged part every frame, picks up a placed part when the player presses on it, and updates the hand cursor.
@@ -215,36 +224,69 @@ namespace RocketToTheMoon.Core
             SitOnPad();
         }
 
-        // Puts the dragged part under the cursor, tilted against the way it moves so it feels like it has weight.
+        // Hangs the dragged part from the cursor by the middle of its top edge, tilted against the way it moves so it feels like it has weight.
         void Float(Vector2 cursor, Vector3 from)
         {
             Transform cam = Camera.main.transform;
             Vector3 point = CursorPoint(cursor);
-            float lag = Vector3.Dot(point - from, cam.right);
-            float angle = Mathf.Clamp(-lag * tiltPerMetre, -maxTilt, maxTilt);
 
+            // Upright first, to find how far the top is from the part's pivot.
             preview.transform.SetParent(transform);
-            preview.transform.localScale = Vector3.one;
-            preview.transform.SetPositionAndRotation(point, Quaternion.AngleAxis(angle, cam.forward) * transform.rotation);
+            preview.transform.localScale = Vector3.one * FloatSize();
+            preview.transform.SetPositionAndRotation(point, transform.rotation);
             preview.SetActive(true);
+            Vector3 hang = TopCentre(preview) - point;
+
+            // Then tilt it around the top, which stays on the cursor.
+            float lag = Vector3.Dot(point - (from + hang), cam.right);
+            Quaternion tilt = Quaternion.AngleAxis(Mathf.Clamp(-lag * tiltPerMetre, -maxTilt, maxTilt), cam.forward);
+            preview.transform.SetPositionAndRotation(point - tilt * hang, tilt * transform.rotation);
         }
 
-        // Moves a part from where it was a bit towards where it is now (its goal), and grows it towards normal size.
+        // Moves a part from where it was a bit towards where it is now (its goal), and its size towards its goal size.
         void Ease(GameObject part, Pose from, float fromSize)
         {
             float t = followSpeed * Time.deltaTime;
             Transform goal = part.transform;
             goal.SetPositionAndRotation(Vector3.Lerp(from.position, goal.position, t), Quaternion.Slerp(from.rotation, goal.rotation, t));
-            goal.localScale = Vector3.one * Mathf.Lerp(fromSize, 1f, t);
+            goal.localScale = Vector3.one * Mathf.Lerp(fromSize, goal.localScale.x, t);
         }
 
-        // The point under the cursor, at the rocket's distance from the camera.
+        // The point under the cursor, a bit in front of the rocket so the rocket base never hides a floating part.
         Vector3 CursorPoint(Vector2 cursor)
         {
+            Transform cam = Camera.main.transform;
             Ray ray = Camera.main.ScreenPointToRay(cursor);
-            Plane plane = new Plane(-Camera.main.transform.forward, transform.position);
+            Plane plane = new Plane(-cam.forward, transform.position - cam.forward * floatInFront);
             plane.Raycast(ray, out float distance);
             return ray.GetPoint(distance);
+        }
+
+        // The size that makes a floating part look as big as it would on the rocket, since it is closer to the camera.
+        float FloatSize()
+        {
+            Transform cam = Camera.main.transform;
+            float rocketDistance = Vector3.Dot(transform.position - cam.position, cam.forward);
+            return (rocketDistance - floatInFront) / rocketDistance;
+        }
+
+        // The middle of the top edge of a part and everything attached to it.
+        static Vector3 TopCentre(GameObject part)
+        {
+            Bounds bounds = PartBounds(part);
+            return new Vector3(bounds.center.x, bounds.max.y, bounds.center.z);
+        }
+
+        // The box around all the meshes of a part and everything attached to it.
+        static Bounds PartBounds(GameObject part)
+        {
+            MeshRenderer[] renderers = part.GetComponentsInChildren<MeshRenderer>();
+            if (renderers.Length == 0) return new Bounds(part.transform.position, Vector3.zero);
+
+            Bounds bounds = renderers[0].bounds;
+            foreach (MeshRenderer r in renderers)
+                bounds.Encapsulate(r.bounds);
+            return bounds;
         }
 
         // The size that makes the dragged part look as big as its store picture (1 is normal size).
@@ -252,15 +294,12 @@ namespace RocketToTheMoon.Core
         {
             if (iconPixels <= 0f) return 1f;
 
-            Bounds bounds = new Bounds(preview.transform.position, Vector3.zero);
-            foreach (MeshRenderer r in preview.GetComponentsInChildren<MeshRenderer>())
-                bounds.Encapsulate(r.bounds);
-
+            Bounds bounds = PartBounds(preview);
             Camera cam = Camera.main;
             float distance = Vector3.Dot(bounds.center - cam.transform.position, cam.transform.forward);
             float metresPerPixel = 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / Screen.height;
             float partPixels = Mathf.Max(bounds.size.x, bounds.size.y) / metresPerPixel;
-            return iconPixels / partPixels;
+            return preview.transform.localScale.x * iconPixels / partPixels;
         }
 
         // Keeps the preview (and its mirror fin) as real parts if they are on a snap point, otherwise removes them.
@@ -278,8 +317,11 @@ namespace RocketToTheMoon.Core
                     RocketPart second = mirrorPreview.GetComponent<RocketPart>();
                     first.pair = second;
                     second.pair = first;
+                    StartCoroutine(Pop(mirrorPreview.transform));
                 }
                 SitOnPad();
+                StartCoroutine(Pop(preview.transform));
+                if (snapClick != null) audioSource.PlayOneShot(snapClick);
             }
             else
             {
@@ -293,6 +335,26 @@ namespace RocketToTheMoon.Core
             mirrorSnap = null;
             movingPlaced = false;
             Changed?.Invoke();
+        }
+
+        // Makes a part that just snapped bounce: it grows a little and shrinks back to normal size. Stops if the part is picked up again.
+        IEnumerator Pop(Transform part)
+        {
+            for (float time = 0f; time < popTime; time += Time.deltaTime)
+            {
+                if (part == null || IsDragged(part)) yield break;
+                float bounce = Mathf.Sin(time / popTime * Mathf.PI);
+                part.localScale = Vector3.one * Mathf.Lerp(1f, popSize, bounce);
+                yield return null;
+            }
+
+            if (part != null && !IsDragged(part)) part.localScale = Vector3.one;
+        }
+
+        // Returns true if the part is one of the parts being dragged.
+        bool IsDragged(Transform part)
+        {
+            return part.gameObject == preview || part.gameObject == mirrorPreview;
         }
 
         // Creates a hidden, tinted copy of a part.

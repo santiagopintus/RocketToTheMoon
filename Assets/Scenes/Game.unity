@@ -8437,6 +8437,7 @@ MonoBehaviour:
   massPerFuel: 1
   visualScale: 0.01
   resetDelay: 3
+  flipSpeed: 90
 --- !u!114 &1468679894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8469,6 +8470,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.RocketBuilder
   maxSnapDistance: 150
   maxParts: 12
+  followSpeed: 15
+  tiltPerMetre: 200
+  maxTilt: 20
+  floatInFront: 0.3
+  popSize: 1.15
+  popTime: 0.15
+  snapClick: {fileID: 8300000, guid: 265d0e9cfb637374bbb8fb0f15ebfa5c, type: 3}
+  openHand: {fileID: 0}
+  closedHand: {fileID: 0}
 --- !u!1 &1570478435
 GameObject:
   m_ObjectHideFlags: 0

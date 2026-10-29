@@ -1,6 +1,7 @@
 using RocketToTheMoon.Core;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RocketToTheMoon.UI
 {
@@ -11,6 +12,7 @@ namespace RocketToTheMoon.UI
         [SerializeField] FlightSimulator simulator;
         [SerializeField] TMP_Text statsLabel;
         [SerializeField] TMP_Text hintLabel;
+        [SerializeField] Button launchButton;
 
         // Starts listening for rocket changes and shows the current numbers.
         void OnEnable()
@@ -42,6 +44,10 @@ namespace RocketToTheMoon.UI
             bool ready = stats.Fuel > 0f && ratio >= 1.5f;
             hintLabel.text = Hint(stats, ratio);
             hintLabel.color = ready ? Palette.Moonlight : Palette.LightTeal;
+
+            // The hint above already says what is missing.
+            bool canLaunch = stats.PartCount > 0 && stats.Thrust > 0f && stats.Fuel > 0f;
+            if (launchButton != null) launchButton.interactable = canLaunch;
         }
 
         // How many parts are used out of the maximum. Turns cream with "FULL" when no more fit.

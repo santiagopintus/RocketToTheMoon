@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa0acadf4a405e47803c4dd59cd74b8, type: 3}
+  m_Name: Body_3_T3
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.BodyData
+  id: body_3_t3
+  partName: Body Tower
+  icon: {fileID: 21300000, guid: 6f8515f243d425446957b50467e68844, type: 3}
+  prefab: {fileID: 6703297895759056085, guid: ad0f5f2d88fb7a143bbcc279c4214d31, type: 3}
+  price: 750
+  tier: 3
+  unlockAltitude: 550
+  mass: 0.12
+  dragArea: 0.0008
+  sideArea: 0.0042

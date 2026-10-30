@@ -69,14 +69,16 @@ A sideways wind that changes over time: the sum of 2 or 3 slow sine waves with r
 
 ### Launch rail
 
-For the first `railLength` metres (about 1 m) the rocket can only move straight up, like the launch rod real model rockets use. This gives it speed before the fins start working.
+For the first `railLength` metres (about 1 m) the rocket can only slide along the rail, like the launch rod real model rockets use. This gives it speed before the fins start working. The rail leans `railTilt` degrees (5) to a random side from the seed, so the rocket flies an arc, noses over at the top and lands away from the pad (about 15 m for the starter).
 
 ### Start, end and score
 
 - On the pad, if thrust is less than weight the rocket does not move.
 - Altitude is the height of the centre of mass above where it started.
 - The flight ends (credits and result popup) when the rocket falls back to 70% of its highest altitude, hits the ground, never lifts off, or runs out of time (120 s). After the popup the sim keeps running so the rocket falls to the ground.
-- Score = highest altitude reached.
+- The ground is `padHeight` (0.2 m) below the pad top. Hitting it faster than `crashSpeed` (8 m/s) hides the rocket, plays the explosion and shakes the camera.
+- Score = highest altitude reached. Credits are paid only for a new record: `creditsPerMetre` (6) for every metre above the old record.
+- On screen the rocket moves at real scale (`visualScale` = 1), so it moves as fast as it spins.
 - A rocket without a nose gets extra drag (`noNoseDrag`) at its flat top.
 
 ### Speed-up and skip
@@ -123,9 +125,21 @@ Higher tiers raise all numbers at once (real improvements). For thrusters that m
 | Tank Normal / Large | 20 / 35 | 0.0002 / 0.0003 | 0.0003 / 0.0004 | fuel 40 g / 80 g | 0 m / 50 m |
 | Thruster Small (T1) | 25 | 0.0003 | 0.0003 | 12 N, 40 g/s | 0 m |
 | Thruster Medium (T2) | 40 | 0.0003 | 0.0003 | 24 N, 50 g/s | 150 m |
-| Thruster Large (T3) | 60 | 0.0004 | 0.0004 | 45 N, 70 g/s | 300 m |
+| Thruster Large (T2) | 60 | 0.0004 | 0.0004 | 45 N, 70 g/s | 300 m |
 
-The `BalanceReport` EditMode test prints the average altitude of several rockets (5 winds each) to the test results. Run it after changing numbers. Last run: starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, T3 with two large tanks 373 m.
+Tier 3 (the `_T3` models; `_1` is cheapest, `_3` most expensive, each with its own trade-off):
+
+| Part | Mass (g) | Drag area | Side area | Other | Price | Unlock |
+|---|---|---|---|---|---|---|
+| Body Mid / Tower | 80 / 120 | 0.0006 / 0.0008 | 0.0028 / 0.0042 | Tower: more room for fins | 400 / 750 | 400 / 550 m |
+| Nose Dome / Cone / Spike | 30 / 45 / 70 | 0.0015 / 0.001 / 0.0006 | 0.0008 / 0.0014 / 0.003 | Spike: big side area up top | 250 / 450 / 700 | 400 / 450 / 600 m |
+| Fin Swept | 20 | 0.0004 | 0.012 | | 350 | 400 m |
+| Tank Compact / Tall / Giant | 40 / 80 / 150 | 0.0004 / 0.0005 / 0.0016 | 0.0008 / 0.0014 / 0.003 | fuel 130 / 260 / 550 g | 600 / 1000 / 1800 | 400 / 500 / 700 m |
+| Thruster Sipper / Booster / Titan | 70 / 110 / 170 | 0.0006 / 0.0008 / 0.0011 | same as drag | 45 N 50 g/s / 80 N 95 g/s / 150 N 170 g/s | 1400 / 2200 / 3200 | 400 / 550 / 750 m |
+
+Thrusters: the Sipper is the most fuel-efficient but weak, the Titan pushes hardest but needs a lot of fuel.
+
+The `BalanceReport` EditMode test prints the average altitude of several rockets (5 winds each) to the test results. Run it after changing numbers. Last run: starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, Thruster Large with two large tanks 373 m, T3 Sipper with two compact tanks 665 - 752 m (dome / cone / spike), Booster with two tall tanks 939 m, Titan with two giant tanks 1195 m.
 
 ## Fins: one at a time, 10 height steps
 

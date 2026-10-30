@@ -165,7 +165,19 @@ namespace RocketToTheMoon.Tests
             Line("T2 thruster, starter rest", () => Build(new[] { "Thruster_Medium", "Tank_Normal_1", "Body_Short_1", "Nose_Normal" }, 2, "Fin_Small_1", 0, -1, 1));
             Line("T2 thruster, tank large", () => Build(new[] { "Thruster_Medium", "Tank_Large", "Body_Long_1", "Nose_Sharp" }, 2, "Fin_Large_1", 0, -1, 1));
             Line("T2 thruster, 2 tanks large, fins on bottom tank", () => Build(new[] { "Thruster_Medium", "Tank_Large", "Tank_Large", "Body_Long_1", "Nose_Sharp" }, 1, "Fin_Large_1", 0, -1, 1));
-            Line("T3 thruster, 2 tanks large, fins on bottom tank", () => Build(new[] { "Thruster_Large", "Tank_Large", "Tank_Large", "Body_Long_1", "Nose_Sharp" }, 1, "Fin_Large_1", 0, -1, 1));
+            Line("thruster large, 2 tanks large, fins on bottom tank", () => Build(new[] { "Thruster_Large", "Tank_Large", "Tank_Large", "Body_Long_1", "Nose_Sharp" }, 1, "Fin_Large_1", 0, -1, 1));
+            Line("T3 sipper, T2 rest", () => Build(new[] { "Thruster_1_T3", "Tank_Large", "Tank_Large", "Body_Long_1", "Nose_Sharp" }, 1, "Fin_Large_1", 0, -1, 1));
+            Line("T3 sipper, 2 compact, mid, dome", () => Build(new[] { "Thruster_1_T3", "Tank_1_T3", "Tank_1_T3", "Body_2_T3", "Nose_1_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 sipper, 2 compact, mid, cone", () => Build(new[] { "Thruster_1_T3", "Tank_1_T3", "Tank_1_T3", "Body_2_T3", "Nose_2_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 sipper, 2 compact, mid, spike", () => Build(new[] { "Thruster_1_T3", "Tank_1_T3", "Tank_1_T3", "Body_2_T3", "Nose_3_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 sipper, tall, mid, cone", () => Build(new[] { "Thruster_1_T3", "Tank_2_T3", "Body_2_T3", "Nose_2_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 booster, 2 tall, mid, cone", () => Build(new[] { "Thruster_2_T3", "Tank_2_T3", "Tank_2_T3", "Body_2_T3", "Nose_2_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 booster, 2 tall, tower, cone", () => Build(new[] { "Thruster_2_T3", "Tank_2_T3", "Tank_2_T3", "Body_3_T3", "Nose_2_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 booster, giant, tower, cone", () => Build(new[] { "Thruster_2_T3", "Tank_3_T3", "Body_3_T3", "Nose_2_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 titan, giant, tower, spike", () => Build(new[] { "Thruster_3_T3", "Tank_3_T3", "Body_3_T3", "Nose_3_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 titan, 3 tall, tower, spike", () => Build(new[] { "Thruster_3_T3", "Tank_2_T3", "Tank_2_T3", "Tank_2_T3", "Body_3_T3", "Nose_3_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 titan, giant + tall, tower, spike", () => Build(new[] { "Thruster_3_T3", "Tank_3_T3", "Tank_2_T3", "Body_3_T3", "Nose_3_T3" }, 1, "Fin_1_T3", 0, -1, 1));
+            Line("T3 titan, 2 giants, tower, spike", () => Build(new[] { "Thruster_3_T3", "Tank_3_T3", "Tank_3_T3", "Body_3_T3", "Nose_3_T3" }, 1, "Fin_1_T3", 0, -1, 1));
             Debug.Log(report);
         }
     }

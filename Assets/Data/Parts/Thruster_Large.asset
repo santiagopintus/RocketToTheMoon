@@ -20,7 +20,7 @@ MonoBehaviour:
   mass: 0.06
   thrust: 45
   fuelPerSecond: 0.07
-  tier: 3
+  tier: 2
   unlockAltitude: 300
   dragArea: 0.0004
   sideArea: 0.0004

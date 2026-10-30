@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 903aef02a8f0786459ce141dc2301ae5, type: 3}
+  m_Name: Nose_3_T3
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.NoseData
+  id: nose_3_t3
+  partName: Nose Spike
+  icon: {fileID: 21300000, guid: b1ff1eba9d2a33443b0fb4e899a378f7, type: 3}
+  prefab: {fileID: 1762222006365098941, guid: 2b86456714ccfcc4c87db808f42ffc4b, type: 3}
+  price: 700
+  tier: 3
+  unlockAltitude: 600
+  mass: 0.07
+  dragArea: 0.0006
+  sideArea: 0.003

@@ -17,6 +17,9 @@ namespace RocketToTheMoon.Core
         public float spinDamping = 0.0002f;
         public float maxTime = 120f;
 
+        // How far the ground is below the pad top. The rocket lands when it falls this far below where it started.
+        public float groundDepth = 0f;
+
         readonly List<FlightPart> parts;
         readonly float startFuel;
         readonly float[] gustSize = new float[3];
@@ -52,13 +55,12 @@ namespace RocketToTheMoon.Core
         public Vector2 RootPosition => Centre - Rotate(CentreLocal, Angle);
 
         // Sets up the rocket on the pad and picks this flight's wind from the seed.
-        public RocketSim(List<FlightPart> rocketParts, int seed)
+        // The rail leans railTilt degrees to a random side (from the seed), so the rocket flies an arc like a real one.
+        public RocketSim(List<FlightPart> rocketParts, int seed, float railTilt = 0f)
         {
             parts = rocketParts;
             startFuel = TotalFuel();
             CentreLocal = CentreOfMass(TotalMass());
-            Centre = CentreLocal;
-            StartCentre = Centre;
 
             var random = new System.Random(seed);
             for (int i = 0; i < gustSize.Length; i++)
@@ -67,6 +69,11 @@ namespace RocketToTheMoon.Core
                 gustSpeed[i] = 0.3f + 1.7f * (float)random.NextDouble();
                 gustPhase[i] = 2f * Mathf.PI * (float)random.NextDouble();
             }
+
+            float side = random.Next(2) == 0 ? -1f : 1f;
+            Angle = side * railTilt * Mathf.Deg2Rad;
+            Centre = Rotate(CentreLocal, Angle);
+            StartCentre = Centre;
         }
 
         // Runs the whole flight at once. Used by tests and to skip a flight.
@@ -110,14 +117,14 @@ namespace RocketToTheMoon.Core
                 }
             }
 
-            // On the launch rail the rocket can only go straight up.
+            // On the launch rail the rocket can only slide along the rail.
             if (Altitude >= railLength) OffRail = true;
             if (!OffRail)
             {
-                force.x = 0f;
+                force = Vector2.Dot(force, up) * up;
                 torque = 0f;
                 Spin = 0f;
-                Velocity = new Vector2(0f, Velocity.y);
+                Velocity = Vector2.Dot(Velocity, up) * up;
             }
 
             Velocity += force / mass * Dt;
@@ -133,7 +140,7 @@ namespace RocketToTheMoon.Core
             }
 
             if (Altitude > 0f) LeftGround = true;
-            else if (LeftGround) Landed = true;
+            if (LeftGround && Altitude <= -groundDepth) Landed = true;
 
             MaxAltitude = Mathf.Max(MaxAltitude, Altitude);
         }

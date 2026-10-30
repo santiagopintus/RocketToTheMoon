@@ -5,20 +5,29 @@ namespace RocketToTheMoon.Core
 {
     // Turns the built rocket into a RocketSim at launch, runs it, and moves and turns the rocket on screen.
     // The flight ends (credits and result popup) once the rocket falls back to part of its highest altitude, then it keeps falling to the ground.
+    // If it hits the ground fast it explodes and hides.
     public class FlightSimulator : MonoBehaviour
     {
         [SerializeField] float gravity = 9.81f;
-        [SerializeField] float visualScale = 0.01f;
+        [SerializeField] float visualScale = 1f;
         [SerializeField] float railLength = 1f;
+        [SerializeField] float railTilt = 5f;
         [SerializeField] float maxGust = 3f;
         [SerializeField] float noNoseDrag = 0.004f;
         [SerializeField] float endAtFraction = 0.7f;
+        [SerializeField] float padHeight = 0.2f;
+        [SerializeField] float crashSpeed = 8f;
 
         Vector3 startPosition;
         Quaternion startRotation;
         RocketSim sim;
+        bool crashed;
+        readonly List<Renderer> hidden = new List<Renderer>();
 
         public float Gravity => gravity;
+
+        // True while the thrusters are firing.
+        public bool Burning => sim != null && sim.Burning;
 
         // Remembers where the rocket sits on the pad.
         void Awake()
@@ -34,10 +43,11 @@ namespace RocketToTheMoon.Core
             if (GameState.IsFlying) return;
 
             ResetToPad();
-            sim = new RocketSim(ReadParts(), Random.Range(0, int.MaxValue));
+            sim = new RocketSim(ReadParts(), Random.Range(0, int.MaxValue), railTilt);
             sim.gravity = gravity;
             sim.railLength = railLength;
             sim.maxGust = maxGust;
+            sim.groundDepth = padHeight;
             GameState.StartFlight();
         }
 
@@ -109,16 +119,41 @@ namespace RocketToTheMoon.Core
 
             ShowRocket();
             GameState.SetAltitude(Mathf.Max(0f, sim.Altitude));
+            GameState.SetSpeed(sim.Velocity.magnitude);
+            if (sim.Landed && !crashed) Crash();
             if (!GameState.IsFlying) return;
 
             GameState.SetFuel(sim.FuelLeft);
-            GameState.SetSpeed(sim.Velocity.magnitude);
 
             bool fellBack = sim.MaxAltitude > 0f && sim.Velocity.y < 0f && sim.Altitude <= sim.MaxAltitude * endAtFraction;
             if (sim.Finished || fellBack)
-            {                GameState.EndFlight();
+            {
+                GameState.EndFlight();
                 GameState.Land();
             }
+        }
+
+        // If the rocket hit the ground fast, hides it and tells everyone where it exploded.
+        void Crash()
+        {
+            crashed = true;
+            if (sim.Velocity.magnitude < crashSpeed) return;
+
+            foreach (Renderer r in GetComponentsInChildren<Renderer>())
+            {
+                if (!r.enabled) continue;
+                r.enabled = false;
+                hidden.Add(r);
+            }
+            GameState.Crash(transform.TransformPoint(sim.CentreLocal));
+        }
+
+        // Shows the meshes the crash hid again.
+        void ShowHidden()
+        {
+            foreach (Renderer r in hidden)
+                if (r != null) r.enabled = true;
+            hidden.Clear();
         }
 
         // Puts the rocket where the sim says, turned by its angle. Real metres are scaled down so the scene stays small,
@@ -136,6 +171,8 @@ namespace RocketToTheMoon.Core
         public void ResetToPad()
         {
             sim = null;
+            crashed = false;
+            ShowHidden();
             transform.position = startPosition;
             transform.rotation = startRotation;
             GameState.SetFuel(1f);

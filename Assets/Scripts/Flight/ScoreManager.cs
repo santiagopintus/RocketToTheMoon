@@ -2,10 +2,11 @@ using UnityEngine;
 
 namespace RocketToTheMoon.Core
 {
-    // Turns the max altitude into credits when a flight ends and saves them. The result popup shows them.
+    // Pays credits for every metre above the old record when a flight ends. No new record, no credits.
+    // The result popup shows them.
     public class ScoreManager : MonoBehaviour
     {
-        [SerializeField] float creditsPerMetre = 0.1f;
+        [SerializeField] float creditsPerMetre = 6f;
 
         public int LastCredits { get; private set; }
 
@@ -25,14 +26,14 @@ namespace RocketToTheMoon.Core
             GameState.FlightEnded -= OnFlightEnded;
         }
 
-        // Saves the best altitude, works out the reward and adds it to the player's credits.
+        // Saves the best altitude, pays for the metres gained over the old record and adds them to the player's credits.
         // The best altitude is saved first, so the store sees new parts when the credits change.
         void OnFlightEnded()
         {
             PreviousBest = PlayerSession.BestAltitude;
             IsNewBest = GameState.MaxAltitude > PreviousBest;
             PlayerSession.ReportAltitude(GameState.MaxAltitude);
-            LastCredits = Mathf.RoundToInt(GameState.MaxAltitude * creditsPerMetre);
+            LastCredits = IsNewBest ? Mathf.RoundToInt((GameState.MaxAltitude - PreviousBest) * creditsPerMetre) : 0;
             PlayerSession.AddCredits(LastCredits);
         }
     }

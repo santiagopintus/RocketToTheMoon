@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76c4854afaa955b4bb7be7ee2d81f697, type: 3}
+  m_Name: Tank_1_T3
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FuelTankData
+  id: tank_1_t3
+  partName: Tank Compact
+  icon: {fileID: 21300000, guid: 992844df1942ccb4a8a8f2bc9e10a298, type: 3}
+  prefab: {fileID: 6623523078473323775, guid: 91950c37743b3394dbfba57b7de7b53b, type: 3}
+  price: 600
+  tier: 3
+  unlockAltitude: 400
+  mass: 0.04
+  dragArea: 0.0004
+  sideArea: 0.0008
+  fuelCapacity: 0.13

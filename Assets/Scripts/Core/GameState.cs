@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 namespace RocketToTheMoon.Core
 {
@@ -16,6 +17,7 @@ namespace RocketToTheMoon.Core
         public static event Action<float> FuelChanged;
         public static event Action FlightEnded;
         public static event Action Landed;
+        public static event Action<Vector3> Crashed;
 
         // Resets the flight numbers and tells everyone the rocket launched.
         public static void StartFlight()
@@ -59,6 +61,12 @@ namespace RocketToTheMoon.Core
         public static void Land()
         {
             Landed?.Invoke();
+        }
+
+        // Tells everyone the rocket hit the ground fast and exploded at this point.
+        public static void Crash(Vector3 position)
+        {
+            Crashed?.Invoke(position);
         }
     }
 }

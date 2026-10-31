@@ -14,6 +14,7 @@ namespace RocketToTheMoon.Core
         const string UnlockedKey = "UnlockedParts";
         const string BestAltitudeKey = "BestAltitude";
         const string SeenKey = "SeenParts";
+        const string RocketKey = "LastRocket";
 
         public static string PlayerName { get; private set; } = "";
 
@@ -90,6 +91,31 @@ namespace RocketToTheMoon.Core
             PlayerPrefs.SetString(UnlockedKey, ids.Count == 0 ? "" : string.Join(",", ids) + ",");
             AddCredits(price);
             return true;
+        }
+
+        // Saves the rocket the player built last.
+        public static void SaveRocket(RocketDesign design)
+        {
+            PlayerPrefs.SetString(RocketKey, design.ToJson());
+            PlayerPrefs.Save();
+        }
+
+        // Reads the rocket the player built last. Empty if there is none.
+        public static RocketDesign LoadRocket()
+        {
+            return RocketDesign.FromJson(PlayerPrefs.GetString(RocketKey, ""));
+        }
+
+        // Erases credits, bought parts, best altitude, seen parts and the saved rocket. The name is kept.
+        public static void NewGame()
+        {
+            PlayerPrefs.DeleteKey(CreditsKey);
+            PlayerPrefs.DeleteKey(UnlockedKey);
+            PlayerPrefs.DeleteKey(BestAltitudeKey);
+            PlayerPrefs.DeleteKey(SeenKey);
+            PlayerPrefs.DeleteKey(RocketKey);
+            PlayerPrefs.Save();
+            CreditsChanged?.Invoke();
         }
 
         // Reads the saved list of unlocked part ids.

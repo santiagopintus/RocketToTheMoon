@@ -41,6 +41,12 @@ namespace RocketToTheMoon.UI
             SetOpen(true);
         }
 
+        // Builds the rocket the player made last time, now that the cards are listening for changes.
+        void Start()
+        {
+            builder.Load(PlayerSession.LoadRocket(), parts);
+        }
+
         // Starts listening for launches, and for credit changes, which come right after a flight may have unlocked parts.
         void OnEnable()
         {

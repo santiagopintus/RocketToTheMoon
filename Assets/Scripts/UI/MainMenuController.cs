@@ -8,15 +8,19 @@ using UnityEngine.UI;
 
 namespace RocketToTheMoon.UI
 {
-    /// <summary>Controls the main menu. Play asks for a name, then loads the game.</summary>
+    /// <summary>Controls the main menu. Play asks for a name, then loads the game. New Game erases the save first.</summary>
     public class MainMenuController : MonoBehaviour
     {
         [SerializeField] Button playButton;
         [SerializeField] Button quitButton;
+        [SerializeField] Button newGameButton;
         [SerializeField] GameObject namePanel;
         [SerializeField] TMP_InputField nameInput;
         [SerializeField] Button confirmButton;
         [SerializeField] Button backButton;
+
+        string newGameText;
+        bool askingNewGame;
 
         // Hides the name panel and connects the buttons.
         void Awake()
@@ -26,6 +30,8 @@ namespace RocketToTheMoon.UI
 
             playButton.onClick.AddListener(OpenNamePanel);
             quitButton.onClick.AddListener(Quit);
+            newGameText = newGameButton.GetComponentInChildren<TMP_Text>().text;
+            newGameButton.onClick.AddListener(NewGame);
 #if UNITY_WEBGL && !UNITY_EDITOR
             // A browser tab cannot be closed by the game.
             quitButton.gameObject.SetActive(false);
@@ -43,9 +49,31 @@ namespace RocketToTheMoon.UI
                 CloseNamePanel();
         }
 
+        // The first click asks the player to click again. The second click erases the save and asks for a name.
+        void NewGame()
+        {
+            if (!askingNewGame)
+            {
+                SetAskingNewGame(true);
+                return;
+            }
+
+            PlayerSession.NewGame();
+            SetAskingNewGame(false);
+            OpenNamePanel();
+        }
+
+        // Shows "click again" on the New Game button, or puts its normal text back.
+        void SetAskingNewGame(bool asking)
+        {
+            askingNewGame = asking;
+            newGameButton.GetComponentInChildren<TMP_Text>().text = asking ? "SURE? CLICK AGAIN" : newGameText;
+        }
+
         // Shows the name panel with the last used name.
         void OpenNamePanel()
         {
+            SetAskingNewGame(false);
             namePanel.SetActive(true);
             nameInput.text = PlayerSession.LastUsedName;
             RefreshConfirm();

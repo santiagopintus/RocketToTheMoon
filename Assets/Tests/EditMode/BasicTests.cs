@@ -74,5 +74,30 @@ namespace RocketToTheMoon.Tests
             CollectionAssert.Contains(paths, "Assets/Scenes/" + SceneNames.MainMenu + ".unity");
             CollectionAssert.Contains(paths, "Assets/Scenes/" + SceneNames.Game + ".unity");
         }
+
+        // A rocket design comes back the same after turning it into JSON and reading it again.
+        [Test]
+        public void RocketDesign_JsonRoundTrip()
+        {
+            var design = new RocketDesign();
+            design.parts.Add(new DesignPart { partId = "Body", parent = -1, side = SnapSide.Top });
+            design.parts.Add(new DesignPart { partId = "Fin", parent = 0, side = SnapSide.Left, step = 3 });
+
+            RocketDesign loaded = RocketDesign.FromJson(design.ToJson());
+
+            Assert.AreEqual(2, loaded.parts.Count);
+            Assert.AreEqual("Fin", loaded.parts[1].partId);
+            Assert.AreEqual(0, loaded.parts[1].parent);
+            Assert.AreEqual(SnapSide.Left, loaded.parts[1].side);
+            Assert.AreEqual(3, loaded.parts[1].step);
+        }
+
+        // Empty or broken save text gives an empty design instead of an error.
+        [Test]
+        public void RocketDesign_BadJson_GivesEmptyDesign()
+        {
+            Assert.AreEqual(0, RocketDesign.FromJson("").parts.Count);
+            Assert.AreEqual(0, RocketDesign.FromJson("not json").parts.Count);
+        }
     }
 }

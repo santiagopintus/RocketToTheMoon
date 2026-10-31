@@ -47,8 +47,8 @@ namespace RocketToTheMoon.UI
             PlayerSession.CreditsChanged -= Refresh;
         }
 
-        // Fills the card with a part's data and remembers the builder that dragged parts go to.
-        public void Show(PartData data, RocketBuilder rocketBuilder)
+        // Fills the card with a part's data (and a NEW tag if it just unlocked) and remembers the builder that dragged parts go to.
+        public void Show(PartData data, RocketBuilder rocketBuilder, bool isNew)
         {
             part = data;
             builder = rocketBuilder;
@@ -56,6 +56,7 @@ namespace RocketToTheMoon.UI
             icon.sprite = data.icon;
             icon.enabled = data.icon != null;
             nameLabel.text = data.partName + " <size=70%>T" + data.tier + "</size>";
+            if (isNew) nameLabel.text += "  <size=70%><color=#F2DCB3>NEW</color></size>";
             statsLabel.text = StatsText(data);
             Refresh();
         }

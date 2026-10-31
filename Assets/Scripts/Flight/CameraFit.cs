@@ -8,14 +8,29 @@ namespace RocketToTheMoon.Core
     // The scroll wheel zooms in and out on top of that.
     public class CameraFit : MonoBehaviour
     {
-        [SerializeField] Camera targetCamera;
-        [SerializeField] RocketBuilder builder;
-        [SerializeField] float margin = 1.3f;
-        [SerializeField] float minHeight = 0.9f;
-        [SerializeField] float zoomStep = 0.1f;
-        [SerializeField] float minZoom = 0.4f;
-        [SerializeField] float maxZoom = 2.5f;
-        [SerializeField] float moveSpeed = 5f;
+        [SerializeField]
+        Camera targetCamera;
+
+        [SerializeField]
+        RocketBuilder builder;
+
+        [SerializeField]
+        float margin = 1.3f;
+
+        [SerializeField]
+        float minHeight = 0.9f;
+
+        [SerializeField]
+        float zoomStep = 0.1f;
+
+        [SerializeField]
+        float minZoom = 0.4f;
+
+        [SerializeField]
+        float maxZoom = 2.5f;
+
+        [SerializeField]
+        float moveSpeed = 5f;
 
         Vector3 padPosition;
         Vector3 fitPosition;
@@ -25,7 +40,8 @@ namespace RocketToTheMoon.Core
         // Remembers where the rocket sits on the pad and where the camera starts.
         void Start()
         {
-            if (targetCamera == null || builder == null) return;
+            if (targetCamera == null || builder == null)
+                return;
             padPosition = builder.transform.position;
             fitPosition = targetCamera.transform.position;
         }
@@ -34,8 +50,10 @@ namespace RocketToTheMoon.Core
         // Does nothing while the rocket is away from the pad (flying or falling).
         void LateUpdate()
         {
-            if (targetCamera == null || builder == null) return;
-            if (GameState.IsFlying || builder.transform.position != padPosition) return;
+            if (targetCamera == null || builder == null)
+                return;
+            if (GameState.IsFlying || builder.transform.position != padPosition)
+                return;
 
             ReadScroll();
 
@@ -51,11 +69,14 @@ namespace RocketToTheMoon.Core
         void ReadScroll()
         {
             Mouse mouse = Mouse.current;
-            if (mouse == null) return;
+            if (mouse == null)
+                return;
 
             float scroll = mouse.scroll.ReadValue().y;
-            if (scroll == 0f) return;
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+            if (scroll == 0f)
+                return;
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
 
             zoom *= scroll > 0f ? 1f - zoomStep : 1f + zoomStep;
             zoom = Mathf.Clamp(zoom, minZoom, maxZoom);
@@ -66,7 +87,8 @@ namespace RocketToTheMoon.Core
         {
             Bounds rocket = builder.PlacedBounds();
             float height = Mathf.Max(rocket.size.y * margin, minHeight) * zoom;
-            float distance = height * 0.5f / Mathf.Tan(targetCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            float distance =
+                height * 0.5f / Mathf.Tan(targetCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
             return rocket.center - targetCamera.transform.forward * distance;
         }
     }

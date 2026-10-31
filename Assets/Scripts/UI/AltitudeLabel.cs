@@ -7,7 +7,8 @@ namespace RocketToTheMoon.UI
     // Placeholder: shows the live altitude and speed in a text label.
     public class AltitudeLabel : MonoBehaviour
     {
-        [SerializeField] TMP_Text label;
+        [SerializeField]
+        TMP_Text label;
 
         // Starts listening for altitude changes.
         void OnEnable()
@@ -24,7 +25,11 @@ namespace RocketToTheMoon.UI
         // Writes the altitude in metres and the speed in metres per second.
         void OnAltitudeChanged(float altitude)
         {
-            label.text = altitude.ToString("0") + " m\n<size=50%>" + GameState.Speed.ToString("0") + " m/s</size>";
+            label.text =
+                altitude.ToString("0")
+                + " m\n<size=50%>"
+                + GameState.Speed.ToString("0")
+                + " m/s</size>";
         }
     }
 }

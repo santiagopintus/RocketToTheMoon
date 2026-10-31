@@ -19,9 +19,16 @@ namespace RocketToTheMoon.Core
         // Reads a design from JSON text. Returns an empty design if the text is empty or broken.
         public static RocketDesign FromJson(string json)
         {
-            if (string.IsNullOrEmpty(json)) return new RocketDesign();
-            try { return JsonUtility.FromJson<RocketDesign>(json) ?? new RocketDesign(); }
-            catch (ArgumentException) { return new RocketDesign(); }
+            if (string.IsNullOrEmpty(json))
+                return new RocketDesign();
+            try
+            {
+                return JsonUtility.FromJson<RocketDesign>(json) ?? new RocketDesign();
+            }
+            catch (ArgumentException)
+            {
+                return new RocketDesign();
+            }
         }
     }
 

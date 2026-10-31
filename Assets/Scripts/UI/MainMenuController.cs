@@ -11,13 +11,26 @@ namespace RocketToTheMoon.UI
     /// <summary>Controls the main menu. Play asks for a name, then loads the game. New Game erases the save first.</summary>
     public class MainMenuController : MonoBehaviour
     {
-        [SerializeField] Button playButton;
-        [SerializeField] Button quitButton;
-        [SerializeField] Button newGameButton;
-        [SerializeField] GameObject namePanel;
-        [SerializeField] TMP_InputField nameInput;
-        [SerializeField] Button confirmButton;
-        [SerializeField] Button backButton;
+        [SerializeField]
+        Button playButton;
+
+        [SerializeField]
+        Button quitButton;
+
+        [SerializeField]
+        Button newGameButton;
+
+        [SerializeField]
+        GameObject namePanel;
+
+        [SerializeField]
+        TMP_InputField nameInput;
+
+        [SerializeField]
+        Button confirmButton;
+
+        [SerializeField]
+        Button backButton;
 
         string newGameText;
         bool askingNewGame;
@@ -45,7 +58,11 @@ namespace RocketToTheMoon.UI
         // Closes the name panel when Escape is pressed.
         void Update()
         {
-            if (namePanel.activeSelf && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (
+                namePanel.activeSelf
+                && Keyboard.current != null
+                && Keyboard.current.escapeKey.wasPressedThisFrame
+            )
                 CloseNamePanel();
         }
 
@@ -67,7 +84,9 @@ namespace RocketToTheMoon.UI
         void SetAskingNewGame(bool asking)
         {
             askingNewGame = asking;
-            newGameButton.GetComponentInChildren<TMP_Text>().text = asking ? "SURE? CLICK AGAIN" : newGameText;
+            newGameButton.GetComponentInChildren<TMP_Text>().text = asking
+                ? "SURE? CLICK AGAIN"
+                : newGameText;
         }
 
         // Shows the name panel with the last used name.

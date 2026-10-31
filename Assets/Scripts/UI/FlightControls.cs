@@ -9,12 +9,23 @@ namespace RocketToTheMoon.UI
     // The speed button goes 1x -> 2x -> 4x by changing Time.timeScale. It goes back to 1x when the flight ends.
     public class FlightControls : MonoBehaviour
     {
-        [SerializeField] GameObject panel;
-        [SerializeField] Button speedButton;
-        [SerializeField] TMP_Text speedLabel;
-        [SerializeField] Button skipButton;
-        [SerializeField] FlightSimulator simulator;
-        [SerializeField] float[] speeds = { 1f, 2f, 4f };
+        [SerializeField]
+        GameObject panel;
+
+        [SerializeField]
+        Button speedButton;
+
+        [SerializeField]
+        TMP_Text speedLabel;
+
+        [SerializeField]
+        Button skipButton;
+
+        [SerializeField]
+        FlightSimulator simulator;
+
+        [SerializeField]
+        float[] speeds = { 1f, 2f, 4f };
 
         int speedIndex;
 

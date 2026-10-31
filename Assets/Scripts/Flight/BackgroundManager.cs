@@ -15,22 +15,31 @@ namespace RocketToTheMoon.Core
             public Renderer renderer;
             public float startAltitude;
             public float fullAltitude;
+
             [Tooltip("When fully shown, hides the backgrounds above it in the list.")]
             public bool coversBelow = true;
-            [HideInInspector] public float alpha;
-            [HideInInspector] public Color baseColor;
+
+            [HideInInspector]
+            public float alpha;
+
+            [HideInInspector]
+            public Color baseColor;
         }
 
         [Tooltip("Lowest background first, highest last.")]
-        [SerializeField] List<Background> backgrounds = new List<Background>();
-        [SerializeField] float fadeSpeed = 3f;
+        [SerializeField]
+        List<Background> backgrounds = new List<Background>();
+
+        [SerializeField]
+        float fadeSpeed = 3f;
 
         // Remembers each background's colour and shows the right ones for the ground.
         void Start()
         {
             foreach (Background b in backgrounds)
             {
-                if (b.renderer == null) continue;
+                if (b.renderer == null)
+                    continue;
                 b.baseColor = b.renderer.material.GetColor("_BaseColor");
                 b.alpha = TargetAlpha(b.startAltitude, b.fullAltitude, GameState.Altitude);
             }
@@ -44,7 +53,8 @@ namespace RocketToTheMoon.Core
             {
                 float target = TargetAlpha(b.startAltitude, b.fullAltitude, GameState.Altitude);
                 b.alpha = Mathf.Lerp(b.alpha, target, fadeSpeed * Time.deltaTime);
-                if (Mathf.Abs(b.alpha - target) < 0.001f) b.alpha = target;
+                if (Mathf.Abs(b.alpha - target) < 0.001f)
+                    b.alpha = target;
             }
             ShowBackgrounds();
         }
@@ -56,7 +66,8 @@ namespace RocketToTheMoon.Core
             for (int i = backgrounds.Count - 1; i >= 0; i--)
             {
                 Background b = backgrounds[i];
-                if (b.renderer == null) continue;
+                if (b.renderer == null)
+                    continue;
 
                 bool show = b.alpha > 0f && !covered;
                 b.renderer.enabled = show;
@@ -66,14 +77,16 @@ namespace RocketToTheMoon.Core
                     color.a *= b.alpha;
                     b.renderer.material.SetColor("_BaseColor", color);
                 }
-                if (b.coversBelow && b.alpha >= 1f) covered = true;
+                if (b.coversBelow && b.alpha >= 1f)
+                    covered = true;
             }
         }
 
         // How visible a background should be at this altitude: 0 below start, 1 from full, a blend in between.
         public static float TargetAlpha(float startAltitude, float fullAltitude, float altitude)
         {
-            if (fullAltitude <= startAltitude) return altitude >= startAltitude ? 1f : 0f;
+            if (fullAltitude <= startAltitude)
+                return altitude >= startAltitude ? 1f : 0f;
             return Mathf.Clamp01((altitude - startAltitude) / (fullAltitude - startAltitude));
         }
     }

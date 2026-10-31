@@ -18,6 +18,7 @@ namespace RocketToTheMoon.Core
         {
             public LayerMask layerMask = 0;
             public Material material;
+
             // After transparents, because the sky, hills and moon are transparent and would paint over the outline.
             public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
         }
@@ -33,14 +34,25 @@ namespace RocketToTheMoon.Core
         }
 
         // Adds the pass for the game camera, only while a part has the outline.
-        public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+        public override void AddRenderPasses(
+            ScriptableRenderer renderer,
+            ref RenderingData renderingData
+        )
         {
-            if (settings.material == null || settings.material.passCount < 2 || settings.layerMask.value == 0) return;
-            if (PartOutline.Current == null) return;
+            if (
+                settings.material == null
+                || settings.material.passCount < 2
+                || settings.layerMask.value == 0
+            )
+                return;
+            if (PartOutline.Current == null)
+                return;
 
             CameraType cameraType = renderingData.cameraData.cameraType;
-            if (cameraType == CameraType.Preview || cameraType == CameraType.Reflection) return;
-            if (renderingData.cameraData.renderType == CameraRenderType.Overlay) return;
+            if (cameraType == CameraType.Preview || cameraType == CameraType.Reflection)
+                return;
+            if (renderingData.cameraData.renderType == CameraRenderType.Overlay)
+                return;
 
             pass.Setup(settings);
             renderer.EnqueuePass(pass);
@@ -89,55 +101,111 @@ namespace RocketToTheMoon.Core
             }
 
             // Draws the mask, then the outline on top of the camera picture.
-            public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
+            public override void RecordRenderGraph(
+                RenderGraph renderGraph,
+                ContextContainer frameData
+            )
             {
                 UniversalResourceData resourceData = frameData.Get<UniversalResourceData>();
                 UniversalCameraData cameraData = frameData.Get<UniversalCameraData>();
                 UniversalRenderingData renderingData = frameData.Get<UniversalRenderingData>();
                 UniversalLightData lightData = frameData.Get<UniversalLightData>();
 
-                if (resourceData.isActiveTargetBackBuffer || !resourceData.cameraDepthTexture.IsValid()) return;
+                if (
+                    resourceData.isActiveTargetBackBuffer
+                    || !resourceData.cameraDepthTexture.IsValid()
+                )
+                    return;
 
                 RenderTextureDescriptor maskDesc = cameraData.cameraTargetDescriptor;
                 maskDesc.msaaSamples = 1;
                 maskDesc.depthStencilFormat = GraphicsFormat.None;
-                maskDesc.graphicsFormat = SystemInfo.IsFormatSupported(GraphicsFormat.R32_SFloat, GraphicsFormatUsage.Render)
+                maskDesc.graphicsFormat = SystemInfo.IsFormatSupported(
+                    GraphicsFormat.R32_SFloat,
+                    GraphicsFormatUsage.Render
+                )
                     ? GraphicsFormat.R32_SFloat
                     : GraphicsFormat.R16_SFloat;
-                TextureHandle mask = UniversalRenderer.CreateRenderGraphTexture(renderGraph, maskDesc, "_OutlineMask", true);
+                TextureHandle mask = UniversalRenderer.CreateRenderGraphTexture(
+                    renderGraph,
+                    maskDesc,
+                    "_OutlineMask",
+                    true
+                );
 
                 RenderTextureDescriptor depthDesc = cameraData.cameraTargetDescriptor;
                 depthDesc.msaaSamples = 1;
                 depthDesc.graphicsFormat = GraphicsFormat.None;
-                depthDesc.depthStencilFormat = SystemInfo.GetGraphicsFormat(DefaultFormat.DepthStencil);
-                TextureHandle maskDepth = UniversalRenderer.CreateRenderGraphTexture(renderGraph, depthDesc, "_OutlineMaskDepth", true);
+                depthDesc.depthStencilFormat = SystemInfo.GetGraphicsFormat(
+                    DefaultFormat.DepthStencil
+                );
+                TextureHandle maskDepth = UniversalRenderer.CreateRenderGraphTexture(
+                    renderGraph,
+                    depthDesc,
+                    "_OutlineMaskDepth",
+                    true
+                );
 
-                using (var builder = renderGraph.AddRasterRenderPass<MaskPassData>("Outline Mask", out var passData, profilingSampler))
+                using (
+                    var builder = renderGraph.AddRasterRenderPass<MaskPassData>(
+                        "Outline Mask",
+                        out var passData,
+                        profilingSampler
+                    )
+                )
                 {
-                    DrawingSettings drawing = RenderingUtils.CreateDrawingSettings(ShaderTags, renderingData, cameraData, lightData, SortingCriteria.CommonOpaque);
+                    DrawingSettings drawing = RenderingUtils.CreateDrawingSettings(
+                        ShaderTags,
+                        renderingData,
+                        cameraData,
+                        lightData,
+                        SortingCriteria.CommonOpaque
+                    );
                     drawing.overrideMaterial = material;
                     drawing.overrideMaterialPassIndex = MaskPassIndex;
                     var filtering = new FilteringSettings(RenderQueueRange.all, layerMask);
 
-                    passData.rendererList = renderGraph.CreateRendererList(new RendererListParams(renderingData.cullResults, drawing, filtering));
+                    passData.rendererList = renderGraph.CreateRendererList(
+                        new RendererListParams(renderingData.cullResults, drawing, filtering)
+                    );
                     builder.UseRendererList(passData.rendererList);
                     builder.UseTexture(resourceData.cameraDepthTexture, AccessFlags.Read);
                     builder.SetRenderAttachment(mask, 0, AccessFlags.Write);
                     builder.SetRenderAttachmentDepth(maskDepth, AccessFlags.Write);
-                    builder.SetRenderFunc((MaskPassData data, RasterGraphContext context) =>
-                        context.cmd.DrawRendererList(data.rendererList));
+                    builder.SetRenderFunc(
+                        (MaskPassData data, RasterGraphContext context) =>
+                            context.cmd.DrawRendererList(data.rendererList)
+                    );
                 }
 
-                using (var builder = renderGraph.AddRasterRenderPass<CompositePassData>("Outline Composite", out var passData, profilingSampler))
+                using (
+                    var builder = renderGraph.AddRasterRenderPass<CompositePassData>(
+                        "Outline Composite",
+                        out var passData,
+                        profilingSampler
+                    )
+                )
                 {
                     passData.mask = mask;
                     passData.material = material;
 
                     builder.UseTexture(mask, AccessFlags.Read);
                     builder.UseTexture(resourceData.cameraDepthTexture, AccessFlags.Read);
-                    builder.SetRenderAttachment(resourceData.activeColorTexture, 0, AccessFlags.Write);
-                    builder.SetRenderFunc((CompositePassData data, RasterGraphContext context) =>
-                        Blitter.BlitTexture(context.cmd, data.mask, new Vector4(1f, 1f, 0f, 0f), data.material, CompositePassIndex));
+                    builder.SetRenderAttachment(
+                        resourceData.activeColorTexture,
+                        0,
+                        AccessFlags.Write
+                    );
+                    builder.SetRenderFunc(
+                        (CompositePassData data, RasterGraphContext context) =>
+                            Blitter.BlitTexture(
+                                context.cmd,
+                                data.mask,
+                                new Vector4(1f, 1f, 0f, 0f),
+                                data.material,
+                                CompositePassIndex
+                            )
+                    );
                 }
             }
         }

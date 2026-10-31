@@ -6,10 +6,17 @@ namespace RocketToTheMoon.Core
     // The faster the rocket goes, the more the camera falls behind, so you can see it speed up.
     public class CameraFollow : MonoBehaviour
     {
-        [SerializeField] Camera targetCamera;
-        [SerializeField] Transform target;
-        [SerializeField] float lagPerSpeed = 0.0008f;
-        [SerializeField] float maxLag = 0.15f;
+        [SerializeField]
+        Camera targetCamera;
+
+        [SerializeField]
+        Transform target;
+
+        [SerializeField]
+        float lagPerSpeed = 0.0008f;
+
+        [SerializeField]
+        float maxLag = 0.15f;
 
         Vector3 lastCentre;
         Vector3 lastRootPosition;
@@ -19,7 +26,8 @@ namespace RocketToTheMoon.Core
         // Remembers where the rocket starts.
         void Start()
         {
-            if (target == null) return;
+            if (target == null)
+                return;
             lastCentre = Centre();
             lastRootPosition = target.position;
             lastRootRotation = target.rotation;
@@ -29,10 +37,12 @@ namespace RocketToTheMoon.Core
         // Only when the rocket itself moved, so adding parts while building does not move the camera.
         void LateUpdate()
         {
-            if (targetCamera == null || target == null) return;
+            if (targetCamera == null || target == null)
+                return;
 
             Vector3 centre = Centre();
-            bool rocketMoved = target.position != lastRootPosition || target.rotation != lastRootRotation;
+            bool rocketMoved =
+                target.position != lastRootPosition || target.rotation != lastRootRotation;
             float lag = Mathf.Min(GameState.Speed * lagPerSpeed, maxLag);
 
             if (rocketMoved)
@@ -53,10 +63,12 @@ namespace RocketToTheMoon.Core
         Vector3 Centre()
         {
             MeshRenderer[] renderers = target.GetComponentsInChildren<MeshRenderer>();
-            if (renderers.Length == 0) return target.position;
+            if (renderers.Length == 0)
+                return target.position;
 
             Bounds bounds = renderers[0].bounds;
-            foreach (MeshRenderer r in renderers) bounds.Encapsulate(r.bounds);
+            foreach (MeshRenderer r in renderers)
+                bounds.Encapsulate(r.bounds);
             return bounds.center;
         }
     }

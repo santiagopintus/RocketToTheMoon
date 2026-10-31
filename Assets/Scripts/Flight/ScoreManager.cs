@@ -6,7 +6,8 @@ namespace RocketToTheMoon.Core
     // The result popup shows them.
     public class ScoreManager : MonoBehaviour
     {
-        [SerializeField] float creditsPerMetre = 6f;
+        [SerializeField]
+        float creditsPerMetre = 6f;
 
         public int LastCredits { get; private set; }
 
@@ -33,7 +34,9 @@ namespace RocketToTheMoon.Core
             PreviousBest = PlayerSession.BestAltitude;
             IsNewBest = GameState.MaxAltitude > PreviousBest;
             PlayerSession.ReportAltitude(GameState.MaxAltitude);
-            LastCredits = IsNewBest ? Mathf.RoundToInt((GameState.MaxAltitude - PreviousBest) * creditsPerMetre) : 0;
+            LastCredits = IsNewBest
+                ? Mathf.RoundToInt((GameState.MaxAltitude - PreviousBest) * creditsPerMetre)
+                : 0;
             PlayerSession.AddCredits(LastCredits);
         }
     }

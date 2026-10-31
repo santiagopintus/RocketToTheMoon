@@ -11,16 +11,35 @@ namespace RocketToTheMoon.UI
     // A dot on the STORE handle and on a tab means a part there just unlocked. It goes away once that tab is seen.
     public class ShopPanel : MonoBehaviour
     {
-        [SerializeField] PartData[] parts;
-        [SerializeField] Button toggleButton;
-        [SerializeField] GameObject storeDot;
-        [SerializeField] Transform tabBar;
-        [SerializeField] Button tabPrefab;
-        [SerializeField] Transform cardList;
-        [SerializeField] ShopCard cardPrefab;
-        [SerializeField] CameraSideShift cameraShift;
-        [SerializeField] RocketBuilder builder;
-        [SerializeField] float slideSpeed = 8f;
+        [SerializeField]
+        PartData[] parts;
+
+        [SerializeField]
+        Button toggleButton;
+
+        [SerializeField]
+        GameObject storeDot;
+
+        [SerializeField]
+        Transform tabBar;
+
+        [SerializeField]
+        Button tabPrefab;
+
+        [SerializeField]
+        Transform cardList;
+
+        [SerializeField]
+        ShopCard cardPrefab;
+
+        [SerializeField]
+        CameraSideShift cameraShift;
+
+        [SerializeField]
+        RocketBuilder builder;
+
+        [SerializeField]
+        float slideSpeed = 8f;
 
         readonly List<Button> tabs = new List<Button>();
         RectTransform rect;
@@ -31,7 +50,13 @@ namespace RocketToTheMoon.UI
         void Awake()
         {
             rect = (RectTransform)transform;
-            Array.Sort(parts, (a, b) => a.unlockAltitude != b.unlockAltitude ? a.unlockAltitude.CompareTo(b.unlockAltitude) : a.price.CompareTo(b.price));
+            Array.Sort(
+                parts,
+                (a, b) =>
+                    a.unlockAltitude != b.unlockAltitude
+                        ? a.unlockAltitude.CompareTo(b.unlockAltitude)
+                        : a.price.CompareTo(b.price)
+            );
             toggleButton.onClick.AddListener(() => SetOpen(!isOpen));
 
             foreach (PartType type in Enum.GetValues(typeof(PartType)))
@@ -74,7 +99,8 @@ namespace RocketToTheMoon.UI
         public void SetOpen(bool open)
         {
             isOpen = open;
-            if (cameraShift != null) cameraShift.SetShifted(open);
+            if (cameraShift != null)
+                cameraShift.SetShifted(open);
             MarkShownSeen();
         }
 
@@ -83,7 +109,8 @@ namespace RocketToTheMoon.UI
         {
             if (isOpen)
                 foreach (PartData part in parts)
-                    if (part.Type == shownTab && PlayerSession.IsAvailable(part)) PlayerSession.MarkSeen(part.id);
+                    if (part.Type == shownTab && PlayerSession.IsAvailable(part))
+                        PlayerSession.MarkSeen(part.id);
 
             bool anyNew = false;
             for (int i = 0; i < tabs.Count; i++)
@@ -92,14 +119,16 @@ namespace RocketToTheMoon.UI
                 tabs[i].transform.Find("NewDot").gameObject.SetActive(tabNew);
                 anyNew |= tabNew;
             }
-            if (storeDot != null) storeDot.SetActive(anyNew);
+            if (storeDot != null)
+                storeDot.SetActive(anyNew);
         }
 
         // Returns true if a part of this type is new in the store.
         bool HasNewPart(PartType type)
         {
             foreach (PartData part in parts)
-                if (part.Type == type && PlayerSession.IsNew(part)) return true;
+                if (part.Type == type && PlayerSession.IsNew(part))
+                    return true;
             return false;
         }
 
@@ -113,7 +142,8 @@ namespace RocketToTheMoon.UI
         public PartData NextUnlock(float altitude)
         {
             foreach (PartData part in parts)
-                if (part.unlockAltitude > altitude) return part;
+                if (part.unlockAltitude > altitude)
+                    return part;
             return null;
         }
 
@@ -135,7 +165,9 @@ namespace RocketToTheMoon.UI
             {
                 bool selected = i == (int)type;
                 tabs[i].image.color = selected ? Palette.Teal : Palette.DeepNavy;
-                tabs[i].GetComponentInChildren<TMP_Text>().color = selected ? Palette.Moonlight : Palette.LightTeal;
+                tabs[i].GetComponentInChildren<TMP_Text>().color = selected
+                    ? Palette.Moonlight
+                    : Palette.LightTeal;
             }
 
             foreach (Transform card in cardList)
@@ -143,7 +175,8 @@ namespace RocketToTheMoon.UI
 
             foreach (PartData part in parts)
                 if (part.Type == type)
-                    Instantiate(cardPrefab, cardList).Show(part, builder, PlayerSession.IsNew(part));
+                    Instantiate(cardPrefab, cardList)
+                        .Show(part, builder, PlayerSession.IsNew(part));
 
             // Cards read the new state first, then the parts count as seen.
             MarkShownSeen();

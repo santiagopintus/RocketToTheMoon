@@ -9,17 +9,41 @@ namespace RocketToTheMoon.UI
 {
     // One part in the store: picture, name, stats, price and a Buy button. Owned parts can be dragged onto the rocket or sold back at the same price.
     // A card that cannot be dragged shows a short message over itself when the player presses it.
-    public class ShopCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler
+    public class ShopCard
+        : MonoBehaviour,
+            IBeginDragHandler,
+            IDragHandler,
+            IEndDragHandler,
+            IPointerEnterHandler,
+            IPointerExitHandler,
+            IPointerDownHandler
     {
-        [SerializeField] Image icon;
-        [SerializeField] TMP_Text nameLabel;
-        [SerializeField] TMP_Text statsLabel;
-        [SerializeField] TMP_Text priceLabel;
-        [SerializeField] Button buyButton;
-        [SerializeField] CanvasGroup lockedOverlay;
-        [SerializeField] TMP_Text lockedLabel;
-        [SerializeField] float lockedShowTime = 1f;
-        [SerializeField] float lockedFadeTime = 0.3f;
+        [SerializeField]
+        Image icon;
+
+        [SerializeField]
+        TMP_Text nameLabel;
+
+        [SerializeField]
+        TMP_Text statsLabel;
+
+        [SerializeField]
+        TMP_Text priceLabel;
+
+        [SerializeField]
+        Button buyButton;
+
+        [SerializeField]
+        CanvasGroup lockedOverlay;
+
+        [SerializeField]
+        TMP_Text lockedLabel;
+
+        [SerializeField]
+        float lockedShowTime = 1f;
+
+        [SerializeField]
+        float lockedFadeTime = 0.3f;
 
         PartData part;
         RocketBuilder builder;
@@ -32,7 +56,8 @@ namespace RocketToTheMoon.UI
             buttonLabel = buyButton.GetComponentInChildren<TMP_Text>();
             nameColor = nameLabel.color;
             buyButton.onClick.AddListener(BuyOrSell);
-            if (lockedOverlay != null) lockedOverlay.alpha = 0f;
+            if (lockedOverlay != null)
+                lockedOverlay.alpha = 0f;
         }
 
         // Starts listening for credit changes, since they change what the player can afford.
@@ -56,7 +81,8 @@ namespace RocketToTheMoon.UI
             icon.sprite = data.icon;
             icon.enabled = data.icon != null;
             nameLabel.text = data.partName + " <size=70%>T" + data.tier + "</size>";
-            if (isNew) nameLabel.text += "  <size=70%><color=#F2DCB3>NEW</color></size>";
+            if (isNew)
+                nameLabel.text += "  <size=70%><color=#F2DCB3>NEW</color></size>";
             statsLabel.text = StatsText(data);
             Refresh();
         }
@@ -64,9 +90,11 @@ namespace RocketToTheMoon.UI
         // Stops listening to the builder.
         void OnDestroy()
         {
-            if (builder == null) return;
+            if (builder == null)
+                return;
             builder.Changed -= Refresh;
-            if (builder.HoveredCard == part) builder.HoveredCard = null;
+            if (builder.HoveredCard == part)
+                builder.HoveredCard = null;
         }
 
         // Tells the builder the cursor is over this card, so it can show the open hand.
@@ -78,28 +106,33 @@ namespace RocketToTheMoon.UI
         // Tells the builder the cursor left this card.
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (builder.HoveredCard == part) builder.HoveredCard = null;
+            if (builder.HoveredCard == part)
+                builder.HoveredCard = null;
         }
 
         // Sells the part if the player owns it, otherwise buys it. The credits change and every card refreshes.
         void BuyOrSell()
         {
-            if (PlayerSession.IsUnlocked(part.id)) PlayerSession.TrySell(part.id, part.price);
-            else PlayerSession.TryBuy(part.id, part.price);
+            if (PlayerSession.IsUnlocked(part.id))
+                PlayerSession.TrySell(part.id, part.price);
+            else
+                PlayerSession.TryBuy(part.id, part.price);
         }
 
         // Starts dragging a copy of the part, if the player owns it. The part appears at the same size as the card's picture.
         public void OnBeginDrag(PointerEventData eventData)
         {
             float iconHeight = icon.rectTransform.rect.height * icon.canvas.scaleFactor;
-            if (PlayerSession.IsUnlocked(part.id)) builder.StartDrag(part, iconHeight);
+            if (PlayerSession.IsUnlocked(part.id))
+                builder.StartDrag(part, iconHeight);
         }
 
         // Shows why the part cannot be dragged, if it cannot.
         public void OnPointerDown(PointerEventData eventData)
         {
             string reason = LockedReason();
-            if (reason == null || lockedOverlay == null) return;
+            if (reason == null || lockedOverlay == null)
+                return;
 
             lockedLabel.text = reason;
             StopAllCoroutines();
@@ -111,11 +144,14 @@ namespace RocketToTheMoon.UI
         {
             if (!PlayerSession.IsUnlocked(part.id))
             {
-                if (!PlayerSession.IsAvailable(part)) return "UNLOCK AT " + part.unlockAltitude.ToString("0") + " m";
+                if (!PlayerSession.IsAvailable(part))
+                    return "UNLOCK AT " + part.unlockAltitude.ToString("0") + " m";
                 return "BUY IT FIRST";
             }
-            if (!builder.CanAdd(part)) return "PLACE A BODY FIRST";
-            if (builder.IsFull()) return "ROCKET IS FULL";
+            if (!builder.CanAdd(part))
+                return "PLACE A BODY FIRST";
+            if (builder.IsFull())
+                return "ROCKET IS FULL";
             return null;
         }
 
@@ -133,9 +169,7 @@ namespace RocketToTheMoon.UI
         }
 
         // Does nothing: the builder moves the part every frame. Unity only sends begin and end drag when this exists.
-        public void OnDrag(PointerEventData eventData)
-        {
-        }
+        public void OnDrag(PointerEventData eventData) { }
 
         // Drops the part: it stays if it is on a snap point.
         public void OnEndDrag(PointerEventData eventData)
@@ -148,7 +182,8 @@ namespace RocketToTheMoon.UI
         // Parts not reached yet are greyed out and say which altitude unlocks them.
         void Refresh()
         {
-            if (part == null) return;
+            if (part == null)
+                return;
 
             bool owned = PlayerSession.IsUnlocked(part.id);
             bool canAfford = PlayerSession.Credits >= part.price;
@@ -160,13 +195,23 @@ namespace RocketToTheMoon.UI
             icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
             nameLabel.color = blocked ? Palette.Teal : nameColor;
 
-            if (!available && !owned) priceLabel.text = "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
-            else if (owned && needsBody) priceLabel.text = "<size=70%>BODY FIRST</size>";
-            else if (full) priceLabel.text = "<size=70%>ROCKET FULL</size>";
-            else if (owned) priceLabel.text = "OWNED";
-            else priceLabel.text = part.price + " cr";
+            if (!available && !owned)
+                priceLabel.text =
+                    "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
+            else if (owned && needsBody)
+                priceLabel.text = "<size=70%>BODY FIRST</size>";
+            else if (full)
+                priceLabel.text = "<size=70%>ROCKET FULL</size>";
+            else if (owned)
+                priceLabel.text = "OWNED";
+            else
+                priceLabel.text = part.price + " cr";
 
-            priceLabel.color = owned ? Palette.LightTeal : canAfford && available ? Palette.Moonlight : Palette.Teal;
+            priceLabel.color = owned
+                ? Palette.LightTeal
+                : canAfford && available
+                    ? Palette.Moonlight
+                    : Palette.Teal;
             buttonLabel.text = owned ? "SELL" : "BUY";
             buyButton.interactable = owned ? !builder.IsUsed(part) : canAfford && available;
         }
@@ -176,7 +221,15 @@ namespace RocketToTheMoon.UI
         {
             string text = "Mass " + Grams(data.mass);
             if (data is ThrusterData thruster)
-                text += "\nThrust " + thruster.thrust.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " N\nBurn " + Grams(thruster.fuelPerSecond) + "/s";
+                text +=
+                    "\nThrust "
+                    + thruster.thrust.ToString(
+                        "0.#",
+                        System.Globalization.CultureInfo.InvariantCulture
+                    )
+                    + " N\nBurn "
+                    + Grams(thruster.fuelPerSecond)
+                    + "/s";
             if (data is FuelTankData tank)
                 text += "\nFuel " + Grams(tank.fuelCapacity);
             return text;

@@ -19,17 +19,21 @@ namespace RocketToTheMoon.Core
         // Moves the outline to this part. Null removes it.
         public static void Show(GameObject part)
         {
-            if (Current == part) return;
+            if (Current == part)
+                return;
 
-            if (Current != null) SetLayer(Current, LayerMask.NameToLayer("Default"));
+            if (Current != null)
+                SetLayer(Current, LayerMask.NameToLayer("Default"));
             Current = part;
-            if (part != null) SetLayer(part, LayerMask.NameToLayer("Outline"));
+            if (part != null)
+                SetLayer(part, LayerMask.NameToLayer("Outline"));
         }
 
         // Puts every mesh of the part on the given layer.
         static void SetLayer(GameObject part, int layer)
         {
-            if (layer < 0) return;
+            if (layer < 0)
+                return;
             foreach (MeshRenderer r in part.GetComponentsInChildren<MeshRenderer>(true))
                 r.gameObject.layer = layer;
         }

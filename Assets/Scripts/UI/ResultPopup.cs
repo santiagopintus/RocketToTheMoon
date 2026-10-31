@@ -9,15 +9,32 @@ namespace RocketToTheMoon.UI
     // Continue hides it and puts the rocket back on the pad.
     public class ResultPopup : MonoBehaviour
     {
-        [SerializeField] GameObject panel;
-        [SerializeField] TMP_Text altitudeLabel;
-        [SerializeField] TMP_Text creditsLabel;
-        [SerializeField] TMP_Text bestLabel;
-        [SerializeField] TMP_Text unlockLabel;
-        [SerializeField] Button continueButton;
-        [SerializeField] ScoreManager score;
-        [SerializeField] ShopPanel shop;
-        [SerializeField] FlightSimulator simulator;
+        [SerializeField]
+        GameObject panel;
+
+        [SerializeField]
+        TMP_Text altitudeLabel;
+
+        [SerializeField]
+        TMP_Text creditsLabel;
+
+        [SerializeField]
+        TMP_Text bestLabel;
+
+        [SerializeField]
+        TMP_Text unlockLabel;
+
+        [SerializeField]
+        Button continueButton;
+
+        [SerializeField]
+        ScoreManager score;
+
+        [SerializeField]
+        ShopPanel shop;
+
+        [SerializeField]
+        FlightSimulator simulator;
 
         // Hides the popup and connects the Continue button.
         void Awake()
@@ -56,8 +73,10 @@ namespace RocketToTheMoon.UI
         string UnlockText()
         {
             PartData next = shop.NextUnlock(score.PreviousBest);
-            if (next == null) return "All parts unlocked";
-            if (next.unlockAltitude <= PlayerSession.BestAltitude) return "NEW PART: " + next.partName + "!";
+            if (next == null)
+                return "All parts unlocked";
+            if (next.unlockAltitude <= PlayerSession.BestAltitude)
+                return "NEW PART: " + next.partName + "!";
             return "Next: " + next.partName + " at " + next.unlockAltitude.ToString("0") + " m";
         }
 
@@ -65,7 +84,8 @@ namespace RocketToTheMoon.UI
         string BestText()
         {
             string previous = score.PreviousBest.ToString("0") + " m";
-            if (!score.IsNewBest) return "Best: " + previous;
+            if (!score.IsNewBest)
+                return "Best: " + previous;
             return score.PreviousBest > 0f ? "NEW BEST!  (was " + previous + ")" : "NEW BEST!";
         }
 

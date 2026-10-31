@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -343,6 +344,57 @@ namespace RocketToTheMoon.Core
             previewSnap = null;
             previewStep = -1;
             movingPlaced = false;
+            PlayerSession.SaveRocket(ToDesign());
+            Changed?.Invoke();
+        }
+
+        // Turns the placed parts into a RocketDesign. Parts that are not attached (or hang from one that is not) are left out.
+        public RocketDesign ToDesign()
+        {
+            var design = new RocketDesign();
+            var indexes = new Dictionary<RocketPart, int>();
+
+            foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
+            {
+                if (part.attachedTo == null) continue;
+
+                int parent = -1;
+                if (part.attachedTo != padSnap)
+                {
+                    RocketPart owner = part.attachedTo.transform.parent.GetComponent<RocketPart>();
+                    if (!indexes.TryGetValue(owner, out parent)) continue;
+                }
+
+                indexes[part] = design.parts.Count;
+                design.parts.Add(new DesignPart { partId = part.data.id, parent = parent, side = part.attachedTo.side, step = part.step });
+            }
+
+            return design;
+        }
+
+        // Builds a saved rocket on the pad. Parts the player does not own (and parts attached to them) are skipped.
+        public void Load(RocketDesign design, PartData[] catalog)
+        {
+            var placed = new List<RocketPart>();
+
+            foreach (DesignPart saved in design.parts)
+            {
+                PartData data = Array.Find(catalog, p => p.id == saved.partId);
+                RocketPart parent = saved.parent >= 0 && saved.parent < placed.Count ? placed[saved.parent] : null;
+                SnapPoint snap = saved.parent < 0 ? padSnap : parent != null ? OwnSnap(parent.gameObject, saved.side) : null;
+
+                if (data == null || snap == null || !PlayerSession.IsUnlocked(data.id))
+                {
+                    placed.Add(null);
+                    continue;
+                }
+
+                GameObject part = Instantiate(data.prefab, transform);
+                Keep(part, snap, saved.step);
+                placed.Add(part.GetComponent<RocketPart>());
+            }
+
+            SitOnPad();
             Changed?.Invoke();
         }
 

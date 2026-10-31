@@ -130,7 +130,6 @@ namespace RocketToTheMoon.UI
         void ShowTab(PartType type)
         {
             shownTab = type;
-            MarkShownSeen();
 
             for (int i = 0; i < tabs.Count; i++)
             {
@@ -144,7 +143,10 @@ namespace RocketToTheMoon.UI
 
             foreach (PartData part in parts)
                 if (part.Type == type)
-                    Instantiate(cardPrefab, cardList).Show(part, builder);
+                    Instantiate(cardPrefab, cardList).Show(part, builder, PlayerSession.IsNew(part));
+
+            // Cards read the new state first, then the parts count as seen.
+            MarkShownSeen();
         }
 
         // The text on a tab. Fuel tanks get a shorter name so it fits.

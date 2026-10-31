@@ -127,9 +127,12 @@ namespace RocketToTheMoon.UI
                 builder.StartDrag(part, iconHeight);
         }
 
-        // Shows why the part cannot be dragged, if it cannot.
+        // Blinks the part on the rocket if it is placed, and shows why the part cannot be dragged, if it cannot.
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (PlayerSession.IsUnlocked(part.id) && builder.IsUsed(part))
+                builder.Highlight(part);
+
             string reason = LockedReason();
             if (reason == null || lockedOverlay == null)
                 return;
@@ -150,8 +153,10 @@ namespace RocketToTheMoon.UI
             }
             if (!builder.CanAdd(part))
                 return "PLACE A BODY FIRST";
-            if (builder.IsFull())
+            if (builder.IsFull(part))
                 return "ROCKET IS FULL";
+            if (!builder.HasFreeSpot(part))
+                return "NO FREE SPOT";
             return null;
         }
 
@@ -178,7 +183,7 @@ namespace RocketToTheMoon.UI
         }
 
         // Shows the price and Buy button, or "OWNED" and a Sell button. A part on the rocket cannot be sold.
-        // Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text. Owned parts are also greyed out when the rocket is full.
+        // Owned parts placed on the rocket say "ON ROCKET". Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text. Owned parts are also greyed out when the rocket is full.
         // Parts not reached yet are greyed out and say which altitude unlocks them.
         void Refresh()
         {
@@ -189,8 +194,9 @@ namespace RocketToTheMoon.UI
             bool canAfford = PlayerSession.Credits >= part.price;
             bool available = PlayerSession.IsAvailable(part);
             bool needsBody = !builder.CanAdd(part);
-            bool full = owned && builder.IsFull();
-            bool blocked = needsBody || full || !available;
+            bool full = owned && builder.IsFull(part);
+            bool noSpot = owned && !needsBody && !full && !builder.HasFreeSpot(part);
+            bool blocked = needsBody || full || noSpot || !available;
 
             icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
             nameLabel.color = blocked ? Palette.Teal : nameColor;
@@ -198,10 +204,14 @@ namespace RocketToTheMoon.UI
             if (!available && !owned)
                 priceLabel.text =
                     "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
+            else if (owned && builder.IsUsed(part))
+                priceLabel.text = "<size=70%>ON ROCKET</size>";
             else if (owned && needsBody)
                 priceLabel.text = "<size=70%>BODY FIRST</size>";
             else if (full)
                 priceLabel.text = "<size=70%>ROCKET FULL</size>";
+            else if (noSpot)
+                priceLabel.text = "<size=70%>NO FREE SPOT</size>";
             else if (owned)
                 priceLabel.text = "OWNED";
             else

@@ -50,6 +50,12 @@ namespace RocketToTheMoon.Core
         [SerializeField]
         float floatGap = 0.25f;
 
+        [SerializeField]
+        int highlightBlinks = 2;
+
+        [SerializeField]
+        float highlightBlinkTime = 0.15f;
+
         // Called every time a part is added, moved or removed.
         public event Action Changed;
 
@@ -62,12 +68,14 @@ namespace RocketToTheMoon.Core
         SnapPoint padSnap;
         PartData dragData;
         GameObject preview;
+        GameObject twin;
         SnapPoint previewSnap;
         int previewStep = -1;
         bool movingPlaced;
         float iconPixels;
         Texture2D shownCursor;
         AudioSource audioSource;
+        Coroutine blinking;
 
         // Creates the snap point on the pad where the first body goes, and the audio source for the click.
         void Awake()
@@ -152,7 +160,9 @@ namespace RocketToTheMoon.Core
             if (GameState.IsFlying)
                 return false;
             if (HoveredCard != null)
-                return PlayerSession.IsUnlocked(HoveredCard.id) && CanAdd(HoveredCard);
+                return PlayerSession.IsUnlocked(HoveredCard.id)
+                    && CanAdd(HoveredCard)
+                    && HasFreeSpot(HoveredCard);
             return GrabbablePart(position) != null;
         }
 
@@ -161,8 +171,31 @@ namespace RocketToTheMoon.Core
         {
             dragData = part.data;
             iconPixels = 0f;
+            twin = null;
+            if (part.data.Type == PartType.Fin)
+            {
+                RocketPart other = FindTwin(part);
+                twin = other != null ? Lift(other) : CreatePreview(part.data);
+                twin.SetActive(false);
+            }
             preview = Lift(part);
             movingPlaced = true;
+        }
+
+        // The fin on the opposite side of the same part at the same height, or null.
+        RocketPart FindTwin(RocketPart fin)
+        {
+            SnapPoint mirror = Mirror(fin.attachedTo);
+            foreach (RocketPart other in GetComponentsInChildren<RocketPart>())
+                if (other != fin && other.attachedTo == mirror && other.step == fin.step)
+                    return other;
+            return null;
+        }
+
+        // The snap line on the other side of the same part (left for right, right for left).
+        static SnapPoint Mirror(SnapPoint snap)
+        {
+            return OwnSnap(snap.transform.parent.gameObject, Opposite(snap.side));
         }
 
         // Frees the snap point (or fin step) a placed part was using and tints it like a store preview.
@@ -219,12 +252,13 @@ namespace RocketToTheMoon.Core
         // Called when a store card starts dragging. iconHeight is the card picture's height in pixels, so the part can appear at that size.
         public void StartDrag(PartData data, float iconHeight)
         {
-            if (GameState.IsFlying || IsFull() || !CanAdd(data))
+            if (GameState.IsFlying || IsFull(data) || !CanAdd(data) || !HasFreeSpot(data))
                 return;
 
             dragData = data;
             iconPixels = iconHeight;
             preview = CreatePreview(data);
+            twin = data.Type == PartType.Fin ? CreatePreview(data) : null;
         }
 
         // Moves the dragged part a bit closer to its goal: the closest free snap point, or the cursor when none is close enough.
@@ -263,6 +297,8 @@ namespace RocketToTheMoon.Core
         void Hide()
         {
             preview.SetActive(false);
+            if (twin != null)
+                twin.SetActive(false);
             previewSnap = null;
             previewStep = -1;
             SitOnPad();
@@ -273,6 +309,11 @@ namespace RocketToTheMoon.Core
         {
             PlaceAt(preview, previewSnap, previewStep);
             preview.SetActive(true);
+            if (twin != null)
+            {
+                PlaceAt(twin, Mirror(previewSnap), previewStep);
+                twin.SetActive(true);
+            }
             SitOnPad();
         }
 
@@ -391,6 +432,11 @@ namespace RocketToTheMoon.Core
             if (previewSnap != null)
             {
                 Keep(preview, previewSnap, previewStep);
+                if (twin != null)
+                {
+                    Keep(twin, Mirror(previewSnap), previewStep);
+                    StartCoroutine(Pop(twin.transform));
+                }
                 SitOnPad();
                 StartCoroutine(Pop(preview.transform));
                 if (snapClick != null)
@@ -399,9 +445,12 @@ namespace RocketToTheMoon.Core
             else
             {
                 Destroy(preview);
+                if (twin != null)
+                    Destroy(twin);
             }
 
             preview = null;
+            twin = null;
             previewSnap = null;
             previewStep = -1;
             movingPlaced = false;
@@ -543,9 +592,11 @@ namespace RocketToTheMoon.Core
 
                 if (snap.IsLine)
                 {
+                    SnapPoint mirror = Mirror(snap);
                     for (int i = 0; i < SnapPoint.LineSteps; i++)
                     {
-                        if (snap.takenSteps[i])
+                        // A fin needs this height free on both sides.
+                        if (snap.takenSteps[i] || mirror == null || mirror.takenSteps[i])
                             continue;
                         float distance = ScreenDistance(snap.StepPosition(i), screenPosition);
                         if (distance < closestDistance)
@@ -668,6 +719,8 @@ namespace RocketToTheMoon.Core
             {
                 if (preview != null && r.transform.IsChildOf(preview.transform))
                     continue;
+                if (twin != null && r.transform.IsChildOf(twin.transform))
+                    continue;
                 if (first)
                     bounds = r.bounds;
                 else
@@ -695,6 +748,50 @@ namespace RocketToTheMoon.Core
             return data.Type == PartType.Body || PadBody() != null;
         }
 
+        // Blinks every placed part that uses this part data, so the player can see where it is.
+        public void Highlight(PartData data)
+        {
+            if (blinking != null)
+                StopCoroutine(blinking);
+            blinking = StartCoroutine(Blink(data));
+        }
+
+        // Turns the tint on and off a few times. A part picked up meanwhile keeps its drag tint.
+        IEnumerator Blink(PartData data)
+        {
+            for (int i = 0; i < highlightBlinks * 2; i++)
+            {
+                bool on = i % 2 == 0;
+                foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
+                    if (part.data == data && part.attachedTo != null)
+                        Tint(part.gameObject, on);
+                yield return new WaitForSeconds(highlightBlinkTime);
+            }
+        }
+
+        // Returns true if some free snap point on the rocket (or the empty pad) accepts this part. A fin needs a free height on both sides.
+        public bool HasFreeSpot(PartData data)
+        {
+            foreach (SnapPoint snap in GetComponentsInChildren<SnapPoint>())
+            {
+                if (!Accepts(snap, data.Type))
+                    continue;
+
+                if (!snap.IsLine)
+                {
+                    if (!snap.taken)
+                        return true;
+                    continue;
+                }
+
+                SnapPoint mirror = Mirror(snap);
+                for (int i = 0; i < SnapPoint.LineSteps; i++)
+                    if (!snap.takenSteps[i] && mirror != null && !mirror.takenSteps[i])
+                        return true;
+            }
+            return false;
+        }
+
         // The body sitting on the pad, or null if there is none.
         BodyData PadBody()
         {
@@ -704,10 +801,11 @@ namespace RocketToTheMoon.Core
             return null;
         }
 
-        // Returns true if the rocket already has the most parts allowed.
-        public bool IsFull()
+        // Returns true if the part does not fit any more. A fin comes in a pair, so it needs room for 2.
+        public bool IsFull(PartData data)
         {
-            return PartCount() >= maxParts;
+            int needed = data.Type == PartType.Fin ? 2 : 1;
+            return PartCount() + needed > maxParts;
         }
 
         // How many parts the rocket has (the hidden preview does not count).

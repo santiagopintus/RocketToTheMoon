@@ -5,8 +5,8 @@ namespace RocketToTheMoon.Core
     {
         Body,
         Nose,
-        Thruster,
         FuelTank,
+        Thruster,
         Fin
     }
 }

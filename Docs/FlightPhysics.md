@@ -141,12 +141,12 @@ Thrusters: the Sipper is the most fuel-efficient but weak, the Titan pushes hard
 
 The `BalanceReport` EditMode test prints the average altitude of several rockets (5 winds each) to the test results. Run it after changing numbers. Last run: starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, Thruster Large with two large tanks 373 m, T3 Sipper with two compact tanks 665 - 752 m (dome / cone / spike), Booster with two tall tanks 939 m, Titan with two giant tanks 1195 m.
 
-## Fins: one at a time, 10 height steps
+## Fins: placed as a pair, 10 height steps
 
-- No more fin pairs or mirror logic. Each fin is placed alone, on the left or right.
+- A fin always comes as a **pair**: the store picture shows two fins, and dropping one also places its twin on the opposite side at the same height. Dragging a placed fin lifts both. A pair counts as 2 parts toward the limit of 12.
 - The existing left and right snap points of bodies and tanks act as lines: same x as the point, covering the part's full mesh height (worked out at runtime, no prefab changes).
-- Each line is split into **10 evenly spaced steps**. While dragging, the fin follows the cursor and snaps to the closest free step. The same steps on both sides make it easy to match left and right fins.
-- One fin per step. Lopsided placements are allowed (and teach the player why they curve).
+- Each line is split into **10 evenly spaced steps**. While dragging, the fin follows the cursor and snaps to the closest step that is free on both sides.
+- One fin per step per side. Old saves with a single fin still load (lopsided rockets), but lifting such a fin gives it a twin.
 - Saved in the rocket design as: the part it is on, side, step index (0 - 9).
 
 ## Unlocks by altitude
@@ -163,6 +163,6 @@ The `BalanceReport` EditMode test prints the average altitude of several rockets
 1. **Done.** Part data: `dragArea`, `sideArea`, `tier`, `unlockAltitude`, fuel in kg, real numbers on the 11 assets.
 2. **Done.** `RocketSim` + EditMode tests (same seed same flight, starter about 100 m, low fins beat high fins, no wind flies straight, one fin drifts, too heavy stays on the pad, balance report).
 3. **Done, except speed-up and skip.** `FlightSimulator` uses `RocketSim`: position and rotation on screen, camera follows sideways, random seed per launch. `RocketSim.RunToEnd()` is ready for a skip button.
-4. **Done.** Fins: no more pairs. Left and right snap points are lines with 10 steps (`SnapPoint.IsLine`, `StepPosition`), worked out from the part's mesh height, one fin per step.
+4. **Done.** Fins: left and right snap points are lines with 10 steps (`SnapPoint.IsLine`, `StepPosition`), worked out from the part's mesh height, one fin per step per side, always placed in pairs.
 5. **Done.** Store unlocks by best altitude and tier labels on the cards.
 6. **Next:** speed-up and skip buttons, centre of mass and centre of pressure markers with a stability readout while building, more tier 1 variants (new models), tank fill slider.

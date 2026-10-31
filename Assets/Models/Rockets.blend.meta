@@ -3,7 +3,22 @@ guid: e42d852f0fe361f42b4e91e2e152726b
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m_body_silver
+    second: {fileID: 2100000, guid: b4b6d731fdcd35645a6c3464cc8534f9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m_nose_red
+    second: {fileID: 2100000, guid: 1faf2a37301a0e745850b57b1a24b2fd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m_thruster_black
+    second: {fileID: 2100000, guid: 44c3e697f9b6690429e4e39fe72582a6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

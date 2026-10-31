@@ -30,7 +30,8 @@ namespace RocketToTheMoon.Core
         // Saves the altitude if it beats the best one.
         public static void ReportAltitude(float altitude)
         {
-            if (altitude <= BestAltitude) return;
+            if (altitude <= BestAltitude)
+                return;
             PlayerPrefs.SetFloat(BestAltitudeKey, altitude);
             PlayerPrefs.Save();
         }
@@ -45,13 +46,17 @@ namespace RocketToTheMoon.Core
         // Parts that are there from the start (unlock at 0 m) are never new.
         public static bool IsNew(PartData part)
         {
-            return part.unlockAltitude > 0f && IsAvailable(part) && !IsUnlocked(part.id) && !ReadIds(SeenKey).Contains(part.id);
+            return part.unlockAltitude > 0f
+                && IsAvailable(part)
+                && !IsUnlocked(part.id)
+                && !ReadIds(SeenKey).Contains(part.id);
         }
 
         // Remembers that the player saw this part in the store.
         public static void MarkSeen(string partId)
         {
-            if (ReadIds(SeenKey).Contains(partId)) return;
+            if (ReadIds(SeenKey).Contains(partId))
+                return;
             PlayerPrefs.SetString(SeenKey, PlayerPrefs.GetString(SeenKey, "") + partId + ",");
             PlayerPrefs.Save();
         }
@@ -76,7 +81,10 @@ namespace RocketToTheMoon.Core
             if (IsUnlocked(partId) || Credits < price)
                 return false;
 
-            PlayerPrefs.SetString(UnlockedKey, PlayerPrefs.GetString(UnlockedKey, "") + partId + ",");
+            PlayerPrefs.SetString(
+                UnlockedKey,
+                PlayerPrefs.GetString(UnlockedKey, "") + partId + ","
+            );
             AddCredits(-price);
             return true;
         }
@@ -127,7 +135,9 @@ namespace RocketToTheMoon.Core
         // Reads a saved list of part ids (saved as "id1,id2,").
         static List<string> ReadIds(string key)
         {
-            return new List<string>(PlayerPrefs.GetString(key, "").Split(',', StringSplitOptions.RemoveEmptyEntries));
+            return new List<string>(
+                PlayerPrefs.GetString(key, "").Split(',', StringSplitOptions.RemoveEmptyEntries)
+            );
         }
 
         // Saves the name. Returns false if the name is empty.

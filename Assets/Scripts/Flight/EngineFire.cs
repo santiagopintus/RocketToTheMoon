@@ -6,8 +6,11 @@ namespace RocketToTheMoon.Core
     // The particles stay where they were born, so a fast rocket leaves a long trail behind it.
     public class EngineFire : MonoBehaviour
     {
-        [SerializeField] FlightSimulator simulator;
-        [SerializeField] ParticleSystem fire;
+        [SerializeField]
+        FlightSimulator simulator;
+
+        [SerializeField]
+        ParticleSystem fire;
 
         Vector3 nozzle;
 
@@ -30,18 +33,23 @@ namespace RocketToTheMoon.Core
             float lowest = float.MaxValue;
             foreach (RocketPart part in simulator.GetComponentsInChildren<RocketPart>())
             {
-                if (!(part.data is ThrusterData)) continue;
+                if (!(part.data is ThrusterData))
+                    continue;
                 Bounds bounds = part.OwnBounds();
-                if (bounds.min.y >= lowest) continue;
+                if (bounds.min.y >= lowest)
+                    continue;
                 lowest = bounds.min.y;
-                nozzle = simulator.transform.InverseTransformPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
+                nozzle = simulator.transform.InverseTransformPoint(
+                    new Vector3(bounds.center.x, bounds.min.y, bounds.center.z)
+                );
             }
         }
 
         // Keeps the fire under the thruster, pointing out of the back of the rocket, and only emits while burning.
         void LateUpdate()
         {
-            if (simulator == null || fire == null) return;
+            if (simulator == null || fire == null)
+                return;
 
             Transform rocket = simulator.transform;
             fire.transform.position = rocket.TransformPoint(nozzle);

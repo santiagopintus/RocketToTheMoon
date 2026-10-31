@@ -20,10 +20,12 @@ namespace RocketToTheMoon.Core
         public SnapSide side;
 
         // True once a part is attached here (top and bottom points).
-        [System.NonSerialized] public bool taken;
+        [System.NonSerialized]
+        public bool taken;
 
         // Which heights of the side line already have a fin.
-        [System.NonSerialized] public bool[] takenSteps = new bool[LineSteps];
+        [System.NonSerialized]
+        public bool[] takenSteps = new bool[LineSteps];
 
         // Returns true for the side points, which are lines with height steps.
         public bool IsLine => side == SnapSide.Left || side == SnapSide.Right;

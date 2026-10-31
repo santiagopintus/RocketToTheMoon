@@ -5,11 +5,20 @@ namespace RocketToTheMoon.Core
     // Makes the camera tremble with a random strength while the rocket is flying, and hard for a moment when it crashes.
     public class CameraShake : MonoBehaviour
     {
-        [SerializeField] Camera targetCamera;
-        [SerializeField] float minStrength = 0.001f;
-        [SerializeField] float maxStrength = 0.004f;
-        [SerializeField] float crashStrength = 0.05f;
-        [SerializeField] float crashTime = 0.5f;
+        [SerializeField]
+        Camera targetCamera;
+
+        [SerializeField]
+        float minStrength = 0.001f;
+
+        [SerializeField]
+        float maxStrength = 0.004f;
+
+        [SerializeField]
+        float crashStrength = 0.05f;
+
+        [SerializeField]
+        float crashTime = 0.5f;
 
         Vector3 lastOffset;
         float crashLeft;
@@ -36,7 +45,8 @@ namespace RocketToTheMoon.Core
         // It only adds an offset, so other scripts (like CameraFollow) can still move the camera.
         void Update()
         {
-            if (targetCamera == null) return;
+            if (targetCamera == null)
+                return;
 
             Vector3 offset = Vector3.zero;
             if (crashLeft > 0f)

@@ -8,8 +8,11 @@ namespace RocketToTheMoon.UI
     // Shows how much fuel is left, as a percentage and an optional filled bar.
     public class FuelGauge : MonoBehaviour
     {
-        [SerializeField] TMP_Text label;
-        [SerializeField] Image fillBar;
+        [SerializeField]
+        TMP_Text label;
+
+        [SerializeField]
+        Image fillBar;
 
         // Starts listening for fuel changes and shows the current amount.
         void OnEnable()
@@ -28,7 +31,8 @@ namespace RocketToTheMoon.UI
         void OnFuelChanged(float fuelLeft)
         {
             label.text = "Fuel " + Mathf.RoundToInt(fuelLeft * 100f) + "%";
-            if (fillBar != null) fillBar.fillAmount = fuelLeft;
+            if (fillBar != null)
+                fillBar.fillAmount = fuelLeft;
         }
     }
 }

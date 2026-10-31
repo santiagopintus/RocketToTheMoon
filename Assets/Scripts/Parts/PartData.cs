@@ -33,8 +33,10 @@ namespace RocketToTheMoon.Core
         // Shared rule for stackable parts (body, tank): noses and tanks on top, thrusters and tanks below, fins on the sides.
         protected static bool StackAccepts(SnapSide side, PartType type)
         {
-            if (side == SnapSide.Top) return type == PartType.Nose || type == PartType.FuelTank;
-            if (side == SnapSide.Bottom) return type == PartType.Thruster || type == PartType.FuelTank;
+            if (side == SnapSide.Top)
+                return type == PartType.Nose || type == PartType.FuelTank;
+            if (side == SnapSide.Bottom)
+                return type == PartType.Thruster || type == PartType.FuelTank;
             return type == PartType.Fin;
         }
     }

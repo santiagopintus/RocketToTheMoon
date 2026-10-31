@@ -35,7 +35,7 @@ namespace RocketToTheMoon.Core
             Speed = speed;
         }
 
-        // Saves how much fuel is left (0 = empty, 1 = full) and tells everyone about it.
+        // Saves how much fuel is left 0 is emprty and 1 is full and tells everyone about it.
         public static void SetFuel(float fuelLeft)
         {
             FuelLeft = fuelLeft;
@@ -46,7 +46,8 @@ namespace RocketToTheMoon.Core
         public static void SetAltitude(float altitude)
         {
             Altitude = altitude;
-            if (altitude > MaxAltitude) MaxAltitude = altitude;
+            if (altitude > MaxAltitude)
+                MaxAltitude = altitude;
             AltitudeChanged?.Invoke(altitude);
         }
 

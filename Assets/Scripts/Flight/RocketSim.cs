@@ -79,13 +79,15 @@ namespace RocketToTheMoon.Core
         // Runs the whole flight at once. Used by tests and to skip a flight.
         public void RunToEnd()
         {
-            while (!Finished) Step();
+            while (!Finished)
+                Step();
         }
 
         // Moves the flight forward by one time step.
         public void Step()
         {
-            if (Finished) return;
+            if (Finished)
+                return;
             Time += Dt;
 
             Burning = BurnFuel();
@@ -111,14 +113,18 @@ namespace RocketToTheMoon.Core
                 if (Burning && part.thrust > 0f)
                 {
                     Vector2 thrust = up * part.thrust;
-                    Vector2 thrustPoint = Rotate(new Vector2(0f, part.position.y) - CentreLocal, Angle);
+                    Vector2 thrustPoint = Rotate(
+                        new Vector2(0f, part.position.y) - CentreLocal,
+                        Angle
+                    );
                     force += thrust;
                     torque += Cross(thrustPoint, thrust);
                 }
             }
 
             // On the launch rail the rocket can only slide along the rail.
-            if (Altitude >= railLength) OffRail = true;
+            if (Altitude >= railLength)
+                OffRail = true;
             if (!OffRail)
             {
                 force = Vector2.Dot(force, up) * up;
@@ -139,8 +145,10 @@ namespace RocketToTheMoon.Core
                 Velocity = Vector2.zero;
             }
 
-            if (Altitude > 0f) LeftGround = true;
-            if (LeftGround && Altitude <= -groundDepth) Landed = true;
+            if (Altitude > 0f)
+                LeftGround = true;
+            if (LeftGround && Altitude <= -groundDepth)
+                Landed = true;
 
             MaxAltitude = Mathf.Max(MaxAltitude, Altitude);
         }
@@ -162,7 +170,8 @@ namespace RocketToTheMoon.Core
         // Burns this step's fuel, taken from every tank evenly. Returns true if the thrusters are firing.
         bool BurnFuel()
         {
-            if (!CanBurn()) return false;
+            if (!CanBurn())
+                return false;
 
             float total = TotalFuel();
             float burn = Mathf.Min(total, FuelPerSecond() * Dt);
@@ -190,7 +199,8 @@ namespace RocketToTheMoon.Core
         float TotalFuel()
         {
             float fuel = 0f;
-            foreach (FlightPart part in parts) fuel += part.fuel;
+            foreach (FlightPart part in parts)
+                fuel += part.fuel;
             return fuel;
         }
 
@@ -198,7 +208,8 @@ namespace RocketToTheMoon.Core
         float FuelPerSecond()
         {
             float rate = 0f;
-            foreach (FlightPart part in parts) rate += part.fuelPerSecond;
+            foreach (FlightPart part in parts)
+                rate += part.fuelPerSecond;
             return rate;
         }
 
@@ -206,7 +217,8 @@ namespace RocketToTheMoon.Core
         float TotalMass()
         {
             float mass = 0f;
-            foreach (FlightPart part in parts) mass += part.mass + part.fuel;
+            foreach (FlightPart part in parts)
+                mass += part.mass + part.fuel;
             return Mathf.Max(mass, 0.001f);
         }
 
@@ -214,7 +226,8 @@ namespace RocketToTheMoon.Core
         Vector2 CentreOfMass(float mass)
         {
             Vector2 sum = Vector2.zero;
-            foreach (FlightPart part in parts) sum += (part.mass + part.fuel) * part.position;
+            foreach (FlightPart part in parts)
+                sum += (part.mass + part.fuel) * part.position;
             return sum / mass;
         }
 
@@ -225,7 +238,9 @@ namespace RocketToTheMoon.Core
             foreach (FlightPart part in parts)
             {
                 float mass = part.mass + part.fuel;
-                inertia += mass * (part.position - centre).sqrMagnitude + mass * part.length * part.length / 12f;
+                inertia +=
+                    mass * (part.position - centre).sqrMagnitude
+                    + mass * part.length * part.length / 12f;
             }
             return Mathf.Max(inertia, 0.00001f);
         }

@@ -8,15 +8,32 @@ namespace RocketToTheMoon.Core
     // If it hits the ground fast it explodes and hides.
     public class FlightSimulator : MonoBehaviour
     {
-        [SerializeField] float gravity = 9.81f;
-        [SerializeField] float visualScale = 1f;
-        [SerializeField] float railLength = 1f;
-        [SerializeField] float railTilt = 5f;
-        [SerializeField] float maxGust = 3f;
-        [SerializeField] float noNoseDrag = 0.004f;
-        [SerializeField] float endAtFraction = 0.7f;
-        [SerializeField] float padHeight = 0.2f;
-        [SerializeField] float crashSpeed = 8f;
+        [SerializeField]
+        float gravity = 9.81f;
+
+        [SerializeField]
+        float visualScale = 1f;
+
+        [SerializeField]
+        float railLength = 1f;
+
+        [SerializeField]
+        float railTilt = 5f;
+
+        [SerializeField]
+        float maxGust = 3f;
+
+        [SerializeField]
+        float noNoseDrag = 0.004f;
+
+        [SerializeField]
+        float endAtFraction = 0.7f;
+
+        [SerializeField]
+        float padHeight = 0.2f;
+
+        [SerializeField]
+        float crashSpeed = 8f;
 
         Vector3 startPosition;
         Quaternion startRotation;
@@ -40,7 +57,8 @@ namespace RocketToTheMoon.Core
         // It also works while the rocket is falling, so it doubles as a reset.
         public void Launch()
         {
-            if (GameState.IsFlying) return;
+            if (GameState.IsFlying)
+                return;
 
             ResetToPad();
             sim = new RocketSim(ReadParts(), Random.Range(0, int.MaxValue), railTilt);
@@ -55,7 +73,8 @@ namespace RocketToTheMoon.Core
         // The highest altitude is passed on first, because the counter never sees it while skipping.
         public void Skip()
         {
-            if (sim == null || !GameState.IsFlying) return;
+            if (sim == null || !GameState.IsFlying)
+                return;
 
             sim.RunToEnd();
             GameState.SetAltitude(sim.MaxAltitude);
@@ -66,7 +85,8 @@ namespace RocketToTheMoon.Core
         {
             var stats = new RocketStats();
             foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
-                if (part.data != null) stats.Add(part.data);
+                if (part.data != null)
+                    stats.Add(part.data);
             return stats;
         }
 
@@ -80,11 +100,13 @@ namespace RocketToTheMoon.Core
 
             foreach (RocketPart part in GetComponentsInChildren<RocketPart>())
             {
-                if (part.data == null) continue;
+                if (part.data == null)
+                    continue;
                 Bounds bounds = part.OwnBounds();
                 Vector3 centre = transform.InverseTransformPoint(bounds.center);
                 top = Mathf.Max(top, centre.y + bounds.extents.y);
-                if (part.data.Type == PartType.Nose) hasNose = true;
+                if (part.data.Type == PartType.Nose)
+                    hasNose = true;
 
                 var flightPart = new FlightPart
                 {
@@ -105,27 +127,36 @@ namespace RocketToTheMoon.Core
             }
 
             if (!hasNose && parts.Count > 0)
-                parts.Add(new FlightPart { position = new Vector2(0f, top), dragArea = noNoseDrag });
+                parts.Add(
+                    new FlightPart { position = new Vector2(0f, top), dragArea = noNoseDrag }
+                );
             return parts;
         }
 
         // Moves the flight forward in fixed steps, so the same rocket and wind always give the same result.
         void FixedUpdate()
         {
-            if (sim == null) return;
+            if (sim == null)
+                return;
 
             int steps = Mathf.Max(1, Mathf.RoundToInt(Time.fixedDeltaTime / RocketSim.Dt));
-            for (int i = 0; i < steps; i++) sim.Step();
+            for (int i = 0; i < steps; i++)
+                sim.Step();
 
             ShowRocket();
             GameState.SetAltitude(Mathf.Max(0f, sim.Altitude));
             GameState.SetSpeed(sim.Velocity.magnitude);
-            if (sim.Landed && !crashed) Crash();
-            if (!GameState.IsFlying) return;
+            if (sim.Landed && !crashed)
+                Crash();
+            if (!GameState.IsFlying)
+                return;
 
             GameState.SetFuel(sim.FuelLeft);
 
-            bool fellBack = sim.MaxAltitude > 0f && sim.Velocity.y < 0f && sim.Altitude <= sim.MaxAltitude * endAtFraction;
+            bool fellBack =
+                sim.MaxAltitude > 0f
+                && sim.Velocity.y < 0f
+                && sim.Altitude <= sim.MaxAltitude * endAtFraction;
             if (sim.Finished || fellBack)
             {
                 GameState.EndFlight();
@@ -137,11 +168,13 @@ namespace RocketToTheMoon.Core
         void Crash()
         {
             crashed = true;
-            if (sim.Velocity.magnitude < crashSpeed) return;
+            if (sim.Velocity.magnitude < crashSpeed)
+                return;
 
             foreach (Renderer r in GetComponentsInChildren<Renderer>())
             {
-                if (!r.enabled) continue;
+                if (!r.enabled)
+                    continue;
                 r.enabled = false;
                 hidden.Add(r);
             }
@@ -152,7 +185,8 @@ namespace RocketToTheMoon.Core
         void ShowHidden()
         {
             foreach (Renderer r in hidden)
-                if (r != null) r.enabled = true;
+                if (r != null)
+                    r.enabled = true;
             hidden.Clear();
         }
 
@@ -163,7 +197,8 @@ namespace RocketToTheMoon.Core
             Vector2 moved = (sim.Centre - sim.StartCentre) * visualScale;
             Vector2 root = sim.StartCentre + moved - RocketSim.Rotate(sim.CentreLocal, sim.Angle);
             transform.position = startPosition + startRotation * new Vector3(root.x, root.y, 0f);
-            transform.rotation = startRotation * Quaternion.AngleAxis(sim.Angle * Mathf.Rad2Deg, Vector3.forward);
+            transform.rotation =
+                startRotation * Quaternion.AngleAxis(sim.Angle * Mathf.Rad2Deg, Vector3.forward);
         }
 
         // Stops the flight and puts the rocket back on the pad with full fuel, ready for the next launch.

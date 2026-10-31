@@ -6,17 +6,29 @@ namespace RocketToTheMoon.Core
     // Turn off "Spawn On Start" once players can build their own rocket.
     public class PrototypeRocket : MonoBehaviour
     {
-        [SerializeField] bool spawnOnStart = true;
-        [SerializeField] BodyData body;
-        [SerializeField] NoseData nose;
-        [SerializeField] FuelTankData tank;
-        [SerializeField] ThrusterData thruster;
-        [SerializeField] FinData fin;
+        [SerializeField]
+        bool spawnOnStart = true;
+
+        [SerializeField]
+        BodyData body;
+
+        [SerializeField]
+        NoseData nose;
+
+        [SerializeField]
+        FuelTankData tank;
+
+        [SerializeField]
+        ThrusterData thruster;
+
+        [SerializeField]
+        FinData fin;
 
         // Builds the rocket: nose on top, tank and thruster below, fins on the sides.
         void Start()
         {
-            if (!spawnOnStart) return;
+            if (!spawnOnStart)
+                return;
 
             GameObject bodyPart = Instantiate(body.prefab, transform);
             Attach(nose, bodyPart, SnapSide.Top);
@@ -34,7 +46,12 @@ namespace RocketToTheMoon.Core
             foreach (SnapPoint snap in parentPart.GetComponentsInChildren<SnapPoint>())
             {
                 if (snap.side == side && snap.transform.parent == parentPart.transform)
-                    return Instantiate(data.prefab, snap.transform.position, snap.transform.rotation, parentPart.transform);
+                    return Instantiate(
+                        data.prefab,
+                        snap.transform.position,
+                        snap.transform.rotation,
+                        parentPart.transform
+                    );
             }
 
             Debug.LogWarning(parentPart.name + " has no " + side + " snap point");

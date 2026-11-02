@@ -94,6 +94,7 @@ namespace RocketToTheMoon.Core
             Pointer pointer = Pointer.current;
             if (pointer == null)
                 return;
+            // This is how I track the position of the cursor to make all the building system based on it
             Vector2 position = pointer.position.ReadValue();
 
             if (preview != null)
@@ -117,7 +118,7 @@ namespace RocketToTheMoon.Core
             UpdateOutline(position);
         }
 
-        // Outlines the dragged part, or else the part a press would pick up right now (the same check as picking up, so an outline always means it can be dragged).
+        // Outlines the dragged part. This outline works by setting a Unity layer that automatically aplies the outline to it.
         void UpdateOutline(Vector2 position)
         {
             if (preview != null)

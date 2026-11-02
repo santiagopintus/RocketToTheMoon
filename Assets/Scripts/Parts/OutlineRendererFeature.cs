@@ -7,7 +7,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace RocketToTheMoon.Core
 {
-    // Draws an outline around everything on the "Outline" layer (copied from the ONLINE-PARTY-TEMPLATE project).
+    // Draws an outline around everything on the "Outline" layer
     // It is added to PC_Renderer and Mobile_Renderer with the Outline material (shader Custom/Outline).
     // 1. Mask: the outlined meshes are drawn into a hidden texture that stores how far away they are.
     // 2. Composite: every pixel close to that shape, but outside it, gets the outline colour.

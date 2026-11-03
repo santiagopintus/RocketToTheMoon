@@ -19,6 +19,23 @@ namespace RocketToTheMoon.Core
         public static event Action Landed;
         public static event Action<Vector3> Crashed;
 
+        // Resets everything when Play starts, because the editor keeps static values when domain reload is off.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetState()
+        {
+            Altitude = 0f;
+            MaxAltitude = 0f;
+            IsFlying = false;
+            Speed = 0f;
+            FuelLeft = 1f;
+            FlightStarted = null;
+            AltitudeChanged = null;
+            FuelChanged = null;
+            FlightEnded = null;
+            Landed = null;
+            Crashed = null;
+        }
+
         // Resets the flight numbers and tells everyone the rocket launched.
         public static void StartFlight()
         {

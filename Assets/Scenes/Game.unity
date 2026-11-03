@@ -15023,8 +15023,8 @@ MonoBehaviour:
   popSize: 1.15
   popTime: 0.15
   snapClick: {fileID: 8300000, guid: 265d0e9cfb637374bbb8fb0f15ebfa5c, type: 3}
-  openHand: {fileID: 0}
-  closedHand: {fileID: 0}
+  openHand: {fileID: 2800000, guid: ae74203d3b43ffb44913c7c72338748d, type: 3}
+  closedHand: {fileID: 2800000, guid: ca4fabff02592ac4581c3fdbac2d97c5, type: 3}
   padBase: {fileID: 665180304}
   floatGap: 0.25
   highlightBlinks: 2

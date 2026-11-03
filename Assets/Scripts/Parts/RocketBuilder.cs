@@ -45,6 +45,9 @@ namespace RocketToTheMoon.Core
         Texture2D closedHand;
 
         [SerializeField]
+        Texture2D defaultCursor;
+
+        [SerializeField]
         Collider padBase;
 
         [SerializeField]
@@ -138,10 +141,10 @@ namespace RocketToTheMoon.Core
             return PartUnder(position);
         }
 
-        // Shows a closed hand while dragging, an open hand over something that can be grabbed, and the normal arrow otherwise.
+        // Shows a closed hand while dragging, an open hand over something that can be grabbed, and the default arrow otherwise.
         void UpdateCursor(Vector2 position)
         {
-            Texture2D wanted = null;
+            Texture2D wanted = defaultCursor;
             if (preview != null)
                 wanted = closedHand;
             else if (CanGrab(position))
@@ -150,8 +153,9 @@ namespace RocketToTheMoon.Core
                 return;
 
             shownCursor = wanted;
+            bool isHand = wanted == openHand || wanted == closedHand;
             Vector2 hotspot =
-                wanted != null ? new Vector2(wanted.width, wanted.height) / 2f : Vector2.zero;
+                isHand && wanted != null ? new Vector2(wanted.width, wanted.height) / 2f : Vector2.zero;
             Cursor.SetCursor(wanted, hotspot, CursorMode.Auto);
         }
 

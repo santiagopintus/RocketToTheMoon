@@ -41,7 +41,6 @@ namespace RocketToTheMoon.UI
             ShowCredits();
         }
 
-        // Stops listening.
         void OnDisable()
         {
             PlayerSession.CreditsChanged -= ShowCredits;

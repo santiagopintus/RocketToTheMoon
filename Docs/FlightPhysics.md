@@ -90,7 +90,7 @@ Because the sim is plain C# and fast, skipping just runs all remaining steps at 
 | Class | Kind | Job |
 |---|---|---|
 | `FlightPart` | plain C# | One part's numbers and position for the sim. |
-| `RocketSim` | plain C# | Holds the state and has `Step(dt)`. No Unity scene code, so tests and the server can use it. |
+| `RocketSim` | plain C# | Holds the state and has `Step(dt)`. No Unity scene code, so the server can use it. |
 | `FlightSimulator` | MonoBehaviour | Reads the parts from the scene into `FlightPart`s at launch, steps `RocketSim`, moves and rotates the rocket on screen, reports altitude, speed and fuel to `GameState`. |
 | `RocketStats` | plain C# | Build-screen totals (mass, thrust, fuel, thrust to weight), updated to the new units. |
 
@@ -132,27 +132,44 @@ Tier 3 (the `_T3` models; `_1` is cheapest, `_3` most expensive, each with its o
 | Part | Mass (g) | Drag area | Side area | Other | Price | Unlock |
 |---|---|---|---|---|---|---|
 | Body Mid / Tower | 80 / 120 | 0.0006 / 0.0008 | 0.0028 / 0.0042 | Tower: more room for fins | 400 / 750 | 400 / 550 m |
-| Nose Dome / Cone / Spike | 30 / 45 / 70 | 0.0015 / 0.001 / 0.0006 | 0.0008 / 0.0014 / 0.003 | Spike: big side area up top | 250 / 450 / 700 | 400 / 450 / 600 m |
+| Nose Dome / Cone / Spike | 30 / 45 / 45 | 0.0015 / 0.001 / 0.0004 | 0.0008 / 0.0014 / 0.0016 | Spike: the best T3 nose (least drag) | 250 / 450 / 700 | 400 / 450 / 600 m |
 | Fin Swept | 20 | 0.0004 | 0.012 | | 350 | 400 m |
 | Tank Compact / Tall / Giant | 40 / 80 / 150 | 0.0004 / 0.0005 / 0.0016 | 0.0008 / 0.0014 / 0.003 | fuel 130 / 260 / 550 g | 600 / 1000 / 1800 | 400 / 500 / 700 m |
 | Thruster Sipper / Booster / Titan | 70 / 110 / 170 | 0.0006 / 0.0008 / 0.0011 | same as drag | 45 N 50 g/s / 80 N 95 g/s / 150 N 170 g/s | 1400 / 2200 / 3200 | 400 / 550 / 750 m |
 
 Thrusters: the Sipper is the most fuel-efficient but weak, the Titan pushes hardest but needs a lot of fuel.
 
-The `BalanceReport` EditMode test prints the average altitude of several rockets (5 winds each) to the test results. Run it after changing numbers. Last run: starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, Thruster Large with two large tanks 373 m, T3 Sipper with two compact tanks 665 - 752 m (dome / cone / spike), Booster with two tall tanks 939 m, Titan with two giant tanks 1195 m.
+Tier 4 (the `_T4` models). The `_1_T4` line unlocks at 2000 m (the best T3 rocket reaches about 2190 m). The `_2_T4` line unlocks at 2800 m (the best `_1_T4` rocket reaches about 2900 m) and tops out at about 4100 m.
+
+| Part | Mass (g) | Drag area | Side area | Other | Price | Unlock |
+|---|---|---|---|---|---|---|
+| Body Heavy / Carbon | 70 / 60 | 0.0003 / 0.00025 | 0.004 / 0.0045 | | 1200 / 1800 | 2000 / 2800 m |
+| Nose Ogive / Needle | 40 / 35 | 0.00035 / 0.00025 | 0.0012 / 0.001 | | 1000 / 1500 | 2000 / 2800 m |
+| Fin Delta / Blade | 12 / 10 | 0.0002 / 0.00015 | 0.016 / 0.02 | | 800 / 1100 | 2000 / 2800 m |
+| Tank Heavy / Carbon | 180 / 160 | 0.0028 / 0.0025 | 0.0012 / 0.0011 | fuel 800 / 1000 g | 2500 / 3800 | 2000 / 2800 m |
+| Thruster Mammoth / Vector | 120 / 120 | 0.0009 / 0.0008 | 0.0006 / 0.0005 | 75 N 60 g/s / 85 N 60 g/s | 5000 / 7500 | 2000 / 2800 m |
+
+Older balance run (before the part limits, average of 5 winds): starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, Thruster Large with two large tanks 373 m, T3 Sipper with two compact tanks 665 - 752 m (dome / cone / spike), Booster with two tall tanks 939 m, Titan with two giant tanks 1195 m.
 
 ## Fins: placed as a pair, 10 height steps
 
-- A fin always comes as a **pair**: the store picture shows two fins, and dropping one also places its twin on the opposite side at the same height. Dragging a placed fin lifts both. A pair counts as 2 parts toward the limit of 12.
+- A fin always comes as a **pair**: the store picture shows two fins, and dropping one also places its twin on the opposite side at the same height. Dragging a placed fin lifts both. A rocket can have one pair.
 - The existing left and right snap points of bodies and tanks act as lines: same x as the point, covering the part's full mesh height (worked out at runtime, no prefab changes).
 - Each line is split into **10 evenly spaced steps**. While dragging, the fin follows the cursor and snaps to the closest step that is free on both sides.
 - One fin per step per side. Old saves with a single fin still load (lopsided rockets), but lifting such a fin gives it a twin.
 - Saved in the rocket design as: the part it is on, side, step index (0 - 9).
 
+## Part limits and buying
+
+- A rocket has at most 1 body, 1 nose, 1 thruster, 2 tanks and 1 pair of fins (`maxTanks`, `maxFinPairs` on `RocketBuilder`).
+- There are no Buy or Sell buttons. Dragging a part from the store onto the rocket pays for it. Dragging a placed part off the rocket sells it (and everything on it) back for the same price. A fin pair costs one price.
+- A store card is greyed out when the part is not reached yet, is too expensive, needs a body first, is at its limit, or has no free spot.
+- The assembling base grows with the highest tier ever bought (`PlayerSession.BestTier`, `BaseSwap`): `Base_T1` to `Base_T4` from `AssemblingBase.fbx`.
+
 ## Unlocks by altitude
 
 - `unlockAltitude` on each part. A part appears in the store once the best altitude reaches it, then the player buys it with credits.
-- "Available" (reached the altitude) is different from "owned" (bought, what `PlayerSession.IsUnlocked` means today).
+- "Available" means reached the altitude. Parts are only owned while they are on the rocket.
 - The best altitude is saved in `PlayerSession.BestAltitude` (PlayerPrefs for now, the cloud profile in Sprint 3).
 - Goal: 2 of each part type at 0 m, one more of each at 30 m, 50 m and 75 m, the first tier 2 parts from about 150 m. Today only the existing 11 parts exist (see the table above).
 - Locked parts show greyed out with "REACH 50 m" so players have a goal. The store sorts cards by unlock altitude, then price, and shows the tier next to the name.
@@ -161,7 +178,7 @@ The `BalanceReport` EditMode test prints the average altitude of several rockets
 
 0. **Done.** Removed the part-scaling code. Kept "body first" and the greyed-out cards.
 1. **Done.** Part data: `dragArea`, `sideArea`, `tier`, `unlockAltitude`, fuel in kg, real numbers on the 11 assets.
-2. **Done.** `RocketSim` + EditMode tests (same seed same flight, starter about 100 m, low fins beat high fins, no wind flies straight, one fin drifts, too heavy stays on the pad, balance report).
+2. **Done.** `RocketSim`.
 3. **Done, except speed-up and skip.** `FlightSimulator` uses `RocketSim`: position and rotation on screen, camera follows sideways, random seed per launch. `RocketSim.RunToEnd()` is ready for a skip button.
 4. **Done.** Fins: left and right snap points are lines with 10 steps (`SnapPoint.IsLine`, `StepPosition`), worked out from the part's mesh height, one fin per step per side, always placed in pairs.
 5. **Done.** Store unlocks by best altitude and tier labels on the cards.

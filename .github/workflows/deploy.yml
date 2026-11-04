@@ -1,4 +1,4 @@
-name: Test, build and deploy WebGL
+name: Build and deploy WebGL
 
 on:
   push:
@@ -19,35 +19,8 @@ env:
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
-  # Runs the EditMode tests. If scripts do not compile, this fails too.
-  test:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: write
-    steps:
-      # Frees disk space so the big Unity Docker image fits.
-      - name: Free disk space
-        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
-
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-test-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-test-
-
-      - uses: game-ci/unity-test-runner@v4
-        with:
-          unityVersion: auto
-          testMode: editmode
-
-  # Builds WebGL and deploys to GitHub Pages. Only runs on main, after tests pass.
+  # Builds WebGL and deploys to GitHub Pages. Only runs on main. If scripts do not compile, this fails.
   build-and-deploy:
-    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

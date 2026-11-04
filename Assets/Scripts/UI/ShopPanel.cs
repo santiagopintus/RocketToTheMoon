@@ -79,7 +79,6 @@ namespace RocketToTheMoon.UI
             PlayerSession.CreditsChanged += MarkShownSeen;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.FlightStarted -= Close;

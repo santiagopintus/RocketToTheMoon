@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aa0acadf4a405e47803c4dd59cd74b8, type: 3}
+  m_Name: Body_1_T4
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.BodyData
+  id: body_1_t4
+  partName: Body Heavy
+  icon: {fileID: 21300000, guid: 6d9f1d2eb7dbc6340b6f72a1b35df7af, type: 3}
+  prefab: {fileID: 201425199765147207, guid: 7f56adaf3a5805b4e8bcebcd03420bad, type: 3}
+  price: 1200
+  tier: 4
+  unlockAltitude: 2000
+  mass: 0.07
+  dragArea: 0.0003
+  sideArea: 0.004

@@ -15,7 +15,10 @@ namespace RocketToTheMoon.Core
         float maxSnapDistance = 150f;
 
         [SerializeField]
-        int maxParts = 12;
+        int maxTanks = 2;
+
+        [SerializeField]
+        int maxFinPairs = 1;
 
         [SerializeField]
         float followSpeed = 15f;
@@ -61,9 +64,6 @@ namespace RocketToTheMoon.Core
 
         // Called every time a part is added, moved or removed.
         public event Action Changed;
-
-        // The most parts a rocket can have.
-        public int MaxParts => maxParts;
 
         // The store card under the cursor, or null. Set by the store cards.
         public PartData HoveredCard { get; set; }
@@ -159,16 +159,24 @@ namespace RocketToTheMoon.Core
             Cursor.SetCursor(wanted, hotspot, CursorMode.Auto);
         }
 
-        // Returns true if the cursor is over an owned store card or a placed part.
+        // Returns true if the cursor is over a store card that can be dragged or over a placed part.
         bool CanGrab(Vector2 position)
         {
             if (GameState.IsFlying)
                 return false;
             if (HoveredCard != null)
-                return PlayerSession.IsUnlocked(HoveredCard.id)
-                    && CanAdd(HoveredCard)
-                    && HasFreeSpot(HoveredCard);
+                return CanTake(HoveredCard);
             return GrabbablePart(position) != null;
+        }
+
+        // Returns true if a part can be dragged out of the store now: reached, affordable, under its limit and with a free spot.
+        public bool CanTake(PartData data)
+        {
+            return PlayerSession.IsAvailable(data)
+                && PlayerSession.Credits >= data.price
+                && CanAdd(data)
+                && !AtLimit(data)
+                && HasFreeSpot(data);
         }
 
         // Lifts a placed part (with everything attached to it) off the rocket.
@@ -257,7 +265,7 @@ namespace RocketToTheMoon.Core
         // Called when a store card starts dragging. iconHeight is the card picture's height in pixels, so the part can appear at that size.
         public void StartDrag(PartData data, float iconHeight)
         {
-            if (GameState.IsFlying || IsFull(data) || !CanAdd(data) || !HasFreeSpot(data))
+            if (GameState.IsFlying || !CanTake(data))
                 return;
 
             dragData = data;
@@ -429,10 +437,21 @@ namespace RocketToTheMoon.Core
         }
 
         // Keeps the preview as a real part if it is on a snap point, otherwise removes it.
+        // A part from the store is paid for when it snaps on. A placed part dropped off the rocket is sold back with everything on it.
         public void EndDrag()
         {
             if (preview == null)
                 return;
+
+            if (previewSnap != null && !movingPlaced)
+            {
+                if (PlayerSession.TrySpend(dragData.price))
+                    PlayerSession.ReportTier(dragData.tier);
+                else
+                    previewSnap = null;
+            }
+            if (previewSnap == null && movingPlaced)
+                PlayerSession.AddCredits(Value(preview) + Value(twin));
 
             if (previewSnap != null)
             {
@@ -449,9 +468,14 @@ namespace RocketToTheMoon.Core
             }
             else
             {
+                // Taken off the rocket first, so nothing counts it until it is gone at the end of the frame.
+                preview.transform.SetParent(null);
                 Destroy(preview);
                 if (twin != null)
+                {
+                    twin.transform.SetParent(null);
                     Destroy(twin);
+                }
             }
 
             preview = null;
@@ -461,6 +485,18 @@ namespace RocketToTheMoon.Core
             movingPlaced = false;
             PlayerSession.SaveRocket(ToDesign());
             Changed?.Invoke();
+        }
+
+        // What the part and everything attached to it sells for. A fin is half the price, since the price buys a pair.
+        static int Value(GameObject part)
+        {
+            if (part == null)
+                return 0;
+
+            float total = 0f;
+            foreach (RocketPart p in part.GetComponentsInChildren<RocketPart>(true))
+                total += p.data.Type == PartType.Fin ? p.data.price / 2f : p.data.price;
+            return Mathf.RoundToInt(total);
         }
 
         // Turns the placed parts into a RocketDesign. Parts that are not attached (or hang from one that is not) are left out.
@@ -497,7 +533,7 @@ namespace RocketToTheMoon.Core
             return design;
         }
 
-        // Builds a saved rocket on the pad. Parts the player does not own (and parts attached to them) are skipped.
+        // Builds a saved rocket on the pad. Parts over their limit (and parts attached to them) are skipped.
         public void Load(RocketDesign design, PartData[] catalog)
         {
             var placed = new List<RocketPart>();
@@ -514,12 +550,14 @@ namespace RocketToTheMoon.Core
                             ? OwnSnap(parent.gameObject, saved.side)
                             : null;
 
-                if (data == null || snap == null || !PlayerSession.IsUnlocked(data.id))
+                if (data == null || snap == null || CountOf(data.Type) >= Limit(data.Type))
                 {
                     placed.Add(null);
                     continue;
                 }
 
+                // Saved parts were bought, so they count for the best tier (older saves did not track it).
+                PlayerSession.ReportTier(data.tier);
                 GameObject part = Instantiate(data.prefab, transform);
                 Keep(part, snap, saved.step);
                 placed.Add(part.GetComponent<RocketPart>());
@@ -806,17 +844,31 @@ namespace RocketToTheMoon.Core
             return null;
         }
 
-        // Returns true if the part does not fit any more. A fin comes in a pair, so it needs room for 2.
-        public bool IsFull(PartData data)
+        // Returns true if the rocket already has as many parts of this type as allowed. A fin comes in a pair, so it needs room for 2.
+        public bool AtLimit(PartData data)
         {
             int needed = data.Type == PartType.Fin ? 2 : 1;
-            return PartCount() + needed > maxParts;
+            return CountOf(data.Type) + needed > Limit(data.Type);
         }
 
-        // How many parts the rocket has (the hidden preview does not count).
-        int PartCount()
+        // How many parts of a type a rocket can have: a few tanks, a few fins (in pairs) and one of everything else.
+        public int Limit(PartType type)
         {
-            return GetComponentsInChildren<RocketPart>().Length;
+            if (type == PartType.FuelTank)
+                return maxTanks;
+            if (type == PartType.Fin)
+                return maxFinPairs * 2;
+            return 1;
+        }
+
+        // How many parts of a type are on the rocket, counting the one being dragged.
+        int CountOf(PartType type)
+        {
+            int count = 0;
+            foreach (RocketPart part in GetComponentsInChildren<RocketPart>(true))
+                if (part.data.Type == type)
+                    count++;
+            return count;
         }
     }
 }

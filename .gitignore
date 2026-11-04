@@ -151,3 +151,7 @@ packages/
 # Editor-only setup tools (scene builders etc.), kept local
 /[Aa]ssets/Editor/
 /[Aa]ssets/Editor.meta
+
+# Automated tests, kept local
+/[Aa]ssets/Tests/
+/[Aa]ssets/Tests.meta

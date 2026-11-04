@@ -50,7 +50,6 @@ namespace RocketToTheMoon.UI
             GameState.FlightStarted += Hide;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.Landed -= Show;

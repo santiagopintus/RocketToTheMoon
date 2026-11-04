@@ -21,7 +21,6 @@ namespace RocketToTheMoon.UI
             OnFuelChanged(GameState.FuelLeft);
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.FuelChanged -= OnFuelChanged;

@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 namespace RocketToTheMoon.UI
 {
-    // One part in the store: picture, name, stats, price and a Buy button. Owned parts can be dragged onto the rocket or sold back at the same price.
-    // A card that cannot be dragged shows a short message over itself when the player presses it.
+    // One part in the store: picture, name, stats and price. Dragging it onto the rocket buys it; dragging it off the rocket sells it back.
+    // A card that cannot be dragged is greyed out and shows a short message over itself when the player presses it.
     public class ShopCard
         : MonoBehaviour,
             IBeginDragHandler,
@@ -31,9 +31,6 @@ namespace RocketToTheMoon.UI
         TMP_Text priceLabel;
 
         [SerializeField]
-        Button buyButton;
-
-        [SerializeField]
         CanvasGroup lockedOverlay;
 
         [SerializeField]
@@ -47,15 +44,12 @@ namespace RocketToTheMoon.UI
 
         PartData part;
         RocketBuilder builder;
-        TMP_Text buttonLabel;
         Color nameColor;
 
-        // Connects the Buy button, remembers the name colour (so it can come back after greying out) and hides the locked message.
+        // Remembers the name colour (so it can come back after greying out) and hides the locked message.
         void Awake()
         {
-            buttonLabel = buyButton.GetComponentInChildren<TMP_Text>();
             nameColor = nameLabel.color;
-            buyButton.onClick.AddListener(BuyOrSell);
             if (lockedOverlay != null)
                 lockedOverlay.alpha = 0f;
         }
@@ -66,7 +60,6 @@ namespace RocketToTheMoon.UI
             PlayerSession.CreditsChanged += Refresh;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             PlayerSession.CreditsChanged -= Refresh;
@@ -110,27 +103,17 @@ namespace RocketToTheMoon.UI
                 builder.HoveredCard = null;
         }
 
-        // Sells the part if the player owns it, otherwise buys it. The credits change and every card refreshes.
-        void BuyOrSell()
-        {
-            if (PlayerSession.IsUnlocked(part.id))
-                PlayerSession.TrySell(part.id, part.price);
-            else
-                PlayerSession.TryBuy(part.id, part.price);
-        }
-
-        // Starts dragging a copy of the part, if the player owns it. The part appears at the same size as the card's picture.
+        // Starts dragging a copy of the part (the builder checks it can be taken). The part appears at the same size as the card's picture.
         public void OnBeginDrag(PointerEventData eventData)
         {
             float iconHeight = icon.rectTransform.rect.height * icon.canvas.scaleFactor;
-            if (PlayerSession.IsUnlocked(part.id))
-                builder.StartDrag(part, iconHeight);
+            builder.StartDrag(part, iconHeight);
         }
 
         // Blinks the part on the rocket if it is placed, and shows why the part cannot be dragged, if it cannot.
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (PlayerSession.IsUnlocked(part.id) && builder.IsUsed(part))
+            if (builder.IsUsed(part))
                 builder.Highlight(part);
 
             string reason = LockedReason();
@@ -145,19 +128,26 @@ namespace RocketToTheMoon.UI
         // The message for a part that cannot be dragged now, or null if it can.
         string LockedReason()
         {
-            if (!PlayerSession.IsUnlocked(part.id))
-            {
-                if (!PlayerSession.IsAvailable(part))
-                    return "UNLOCK AT " + part.unlockAltitude.ToString("0") + " m";
-                return "BUY IT FIRST";
-            }
+            if (!PlayerSession.IsAvailable(part))
+                return "UNLOCK AT " + part.unlockAltitude.ToString("0") + " m";
             if (!builder.CanAdd(part))
                 return "PLACE A BODY FIRST";
-            if (builder.IsFull(part))
-                return "ROCKET IS FULL";
+            if (builder.AtLimit(part))
+                return LimitText();
+            if (PlayerSession.Credits < part.price)
+                return "NOT ENOUGH CREDITS";
             if (!builder.HasFreeSpot(part))
                 return "NO FREE SPOT";
             return null;
+        }
+
+        // How many parts of this type a rocket can have, e.g. "MAX 2 PER ROCKET". Fins count in pairs.
+        string LimitText()
+        {
+            int limit = builder.Limit(part.Type);
+            if (part.Type == PartType.Fin)
+                return "MAX " + limit / 2 + " PAIR PER ROCKET";
+            return "MAX " + limit + " PER ROCKET";
         }
 
         // Shows the locked message for a moment, then fades it out.
@@ -182,48 +172,37 @@ namespace RocketToTheMoon.UI
             builder.EndDrag();
         }
 
-        // Shows the price and Buy button, or "OWNED" and a Sell button. A part on the rocket cannot be sold.
-        // Owned parts placed on the rocket say "ON ROCKET". Parts that need a body are greyed out until one is on the pad, and owned ones say so in small text. Owned parts are also greyed out when the rocket is full.
-        // Parts not reached yet are greyed out and say which altitude unlocks them.
+        // Shows the price, or why the part cannot be dragged now. A card that cannot be dragged is greyed out.
+        // A part on the rocket says "ON ROCKET" once no more of its type fit.
         void Refresh()
         {
             if (part == null)
                 return;
 
-            bool owned = PlayerSession.IsUnlocked(part.id);
-            bool canAfford = PlayerSession.Credits >= part.price;
             bool available = PlayerSession.IsAvailable(part);
             bool needsBody = !builder.CanAdd(part);
-            bool full = owned && builder.IsFull(part);
-            bool noSpot = owned && !needsBody && !full && !builder.HasFreeSpot(part);
-            bool blocked = needsBody || full || noSpot || !available;
+            bool atLimit = !needsBody && builder.AtLimit(part);
+            bool noSpot = !needsBody && !atLimit && !builder.HasFreeSpot(part);
+            bool canTake = builder.CanTake(part);
 
-            icon.color = blocked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
-            nameLabel.color = blocked ? Palette.Teal : nameColor;
+            icon.color = canTake ? Color.white : new Color(1f, 1f, 1f, 0.35f);
+            nameLabel.color = canTake ? nameColor : Palette.Teal;
 
-            if (!available && !owned)
+            if (!available)
                 priceLabel.text =
                     "<size=70%>REACH " + part.unlockAltitude.ToString("0") + " m</size>";
-            else if (owned && builder.IsUsed(part))
+            else if (atLimit && builder.IsUsed(part))
                 priceLabel.text = "<size=70%>ON ROCKET</size>";
-            else if (owned && needsBody)
+            else if (atLimit)
+                priceLabel.text = "<size=70%>LIMIT REACHED</size>";
+            else if (needsBody)
                 priceLabel.text = "<size=70%>BODY FIRST</size>";
-            else if (full)
-                priceLabel.text = "<size=70%>ROCKET FULL</size>";
             else if (noSpot)
                 priceLabel.text = "<size=70%>NO FREE SPOT</size>";
-            else if (owned)
-                priceLabel.text = "OWNED";
             else
                 priceLabel.text = part.price + " cr";
 
-            priceLabel.color = owned
-                ? Palette.LightTeal
-                : canAfford && available
-                    ? Palette.Moonlight
-                    : Palette.Teal;
-            buttonLabel.text = owned ? "SELL" : "BUY";
-            buyButton.interactable = owned ? !builder.IsUsed(part) : canAfford && available;
+            priceLabel.color = canTake ? Palette.Moonlight : Palette.Teal;
         }
 
         // Writes the numbers that matter for this kind of part. Masses in grams.

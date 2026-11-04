@@ -23,13 +23,11 @@ namespace RocketToTheMoon.Core
         Vector3 lastOffset;
         float crashLeft;
 
-        // Starts listening for crashes.
         void OnEnable()
         {
             GameState.Crashed += OnCrashed;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.Crashed -= OnCrashed;

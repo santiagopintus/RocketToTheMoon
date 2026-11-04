@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace RocketToTheMoon.Core
 {
-    // One rocket part as the flight sim sees it. Plain C#, so tests and the server can use it.
+    // One rocket part as the flight sim sees it. Plain C#, so the server can use it.
     public class FlightPart
     {
         public Vector2 position; // centre of the part from the rocket root, in metres (x sideways, y up)

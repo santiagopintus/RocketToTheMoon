@@ -8,13 +8,11 @@ namespace RocketToTheMoon.Core
         [SerializeField]
         ParticleSystem explosion;
 
-        // Starts listening for crashes.
         void OnEnable()
         {
             GameState.Crashed += Explode;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.Crashed -= Explode;

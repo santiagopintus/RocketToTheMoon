@@ -1388,6 +1388,16 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3ba13afd8fd1b024fb38d54983746795, type: 2}
   - {fileID: 11400000, guid: d96162104f850734c9291657f3d5d0c9, type: 2}
   - {fileID: 11400000, guid: c09b7296465cd50429ac582183b0735b, type: 2}
+  - {fileID: 11400000, guid: 68e051a6f0a27354eac9b64c625e3b70, type: 2}
+  - {fileID: 11400000, guid: 9f1236098de2aca47968b4c8ea70af33, type: 2}
+  - {fileID: 11400000, guid: f6d90aba40eda004fabf586d0ea8fdfb, type: 2}
+  - {fileID: 11400000, guid: e2ac1d6049c02b64d847bfdefd569587, type: 2}
+  - {fileID: 11400000, guid: 821c905cfaf85e547bdeb91f483bfc12, type: 2}
+  - {fileID: 11400000, guid: 6ced90b23f0cbca4c86aa1d24d38f0d3, type: 2}
+  - {fileID: 11400000, guid: 0b42c3a54b9a8f74786c91112be76da2, type: 2}
+  - {fileID: 11400000, guid: 562b4c8340a23bb4b8db0d9ab368b9a7, type: 2}
+  - {fileID: 11400000, guid: b79fd17562248ce46a2db40dc2c164aa, type: 2}
+  - {fileID: 11400000, guid: c56bb54b1a41a9245a1542eea08f7ff9, type: 2}
   toggleButton: {fileID: 517398999}
   storeDot: {fileID: 1860767956}
   tabBar: {fileID: 1711536712}
@@ -6527,6 +6537,104 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 317229636}
   m_CullTransparentMesh: 1
+--- !u!1001 &354191846
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 665180307}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -6791223306984848162, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 940aeab9a0bffa24eb4bf412705d04fb, type: 2}
+    - target: {fileID: -6147486760733318306, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 940aeab9a0bffa24eb4bf412705d04fb, type: 2}
+    - target: {fileID: -5107288058667459024, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 940aeab9a0bffa24eb4bf412705d04fb, type: 2}
+    - target: {fileID: 919132149155446097, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: m_Name
+      value: AssemblingBase
+      objectReference: {fileID: 0}
+    - target: {fileID: 5193244972826031342, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 940aeab9a0bffa24eb4bf412705d04fb, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+--- !u!1 &354191847 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8466240202181754070, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+  m_PrefabInstance: {fileID: 354191846}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &354191848 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+  m_PrefabInstance: {fileID: 354191846}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &354191849 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -7694330660096678697, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+  m_PrefabInstance: {fileID: 354191846}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &354191850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6168723852814140705, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+  m_PrefabInstance: {fileID: 354191846}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &354191851 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6578126917804413805, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
+  m_PrefabInstance: {fileID: 354191846}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &356168059
 GameObject:
   m_ObjectHideFlags: 0
@@ -17264,6 +17372,7 @@ GameObject:
   m_Component:
   - component: {fileID: 665180307}
   - component: {fileID: 665180304}
+  - component: {fileID: 665180308}
   m_Layer: 0
   m_Name: RocketBase
   m_TagString: Untagged
@@ -17305,9 +17414,28 @@ Transform:
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1147421686}
+  - {fileID: 354191848}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &665180308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 665180303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34f634cf28731b34690f0f7cbc64cf2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.BaseSwap
+  bases:
+  - {fileID: 354191851}
+  - {fileID: 354191850}
+  - {fileID: 354191849}
+  - {fileID: 354191847}
+  platform: {fileID: 665180304}
+  platformSize: {x: 1, y: 0.1, z: 1}
 --- !u!114 &676928805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18427,72 +18555,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131982206}
   m_CullTransparentMesh: 1
---- !u!1001 &1147421685
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 665180307}
-    m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071067
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -7511558181221131132, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
-      value: 
-      objectReference: {fileID: 2100000, guid: 940aeab9a0bffa24eb4bf412705d04fb, type: 2}
-    - target: {fileID: 919132149155446097, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-      propertyPath: m_Name
-      value: AssemblingBase
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
---- !u!4 &1147421686 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2a68b86fce6d0bb4a8c672128b7b2324, type: 3}
-  m_PrefabInstance: {fileID: 1147421685}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1153010332
 GameObject:
   m_ObjectHideFlags: 0
@@ -19850,7 +19912,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.RocketBuilder
   maxSnapDistance: 150
-  maxParts: 12
+  maxTanks: 2
+  maxFinPairs: 1
   followSpeed: 15
   tiltPerMetre: 200
   maxTilt: 20

@@ -63,7 +63,6 @@ namespace RocketToTheMoon.Core
             }
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.FlightStarted -= FindNozzle;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RocketToTheMoon.Core
 {
-    /// <summary>Keeps the player name, credits and unlocked parts between scenes. Saves them for next time.</summary>
+    /// <summary>Keeps the player name, credits, best altitude and best tier between scenes. Saves them for next time.</summary>
     public static class PlayerSession
     {
         public const int MaxNameLength = 16;
@@ -12,6 +12,7 @@ namespace RocketToTheMoon.Core
         const string NameKey = "PlayerName";
         const string CreditsKey = "Credits";
         const string UnlockedKey = "UnlockedParts";
+        const string BestTierKey = "BestTier";
         const string BestAltitudeKey = "BestAltitude";
         const string SeenKey = "SeenParts";
         const string RocketKey = "LastRocket";
@@ -25,7 +26,12 @@ namespace RocketToTheMoon.Core
         // The highest altitude ever reached, in metres. New parts appear in the store as it grows.
         public static float BestAltitude => PlayerPrefs.GetFloat(BestAltitudeKey, 0f);
 
+        // The highest tier of any part ever bought. The assembling base grows with it.
+        public static int BestTier => PlayerPrefs.GetInt(BestTierKey, 1);
+
         public static event Action CreditsChanged;
+
+        public static event Action TierChanged;
 
         // Saves the altitude if it beats the best one.
         public static void ReportAltitude(float altitude)
@@ -48,7 +54,6 @@ namespace RocketToTheMoon.Core
         {
             return part.unlockAltitude > 0f
                 && IsAvailable(part)
-                && !IsUnlocked(part.id)
                 && !ReadIds(SeenKey).Contains(part.id);
         }
 
@@ -69,36 +74,23 @@ namespace RocketToTheMoon.Core
             CreditsChanged?.Invoke();
         }
 
-        // Returns true if the player already bought this part.
-        public static bool IsUnlocked(string partId)
+        // Pays a price. Returns false (and pays nothing) if the player cannot afford it.
+        public static bool TrySpend(int price)
         {
-            return UnlockedIds().Contains(partId);
-        }
-
-        // Pays for a part and unlocks it. Returns false if it is already owned or too expensive.
-        public static bool TryBuy(string partId, int price)
-        {
-            if (IsUnlocked(partId) || Credits < price)
+            if (Credits < price)
                 return false;
-
-            PlayerPrefs.SetString(
-                UnlockedKey,
-                PlayerPrefs.GetString(UnlockedKey, "") + partId + ","
-            );
             AddCredits(-price);
             return true;
         }
 
-        // Gives a part back for the same price it was bought for. Returns false if the player does not own it.
-        public static bool TrySell(string partId, int price)
+        // Remembers the tier of a part the player bought, if it is the highest one so far, and tells everyone about it.
+        public static void ReportTier(int tier)
         {
-            List<string> ids = UnlockedIds();
-            if (!ids.Remove(partId))
-                return false;
-
-            PlayerPrefs.SetString(UnlockedKey, ids.Count == 0 ? "" : string.Join(",", ids) + ",");
-            AddCredits(price);
-            return true;
+            if (tier <= BestTier)
+                return;
+            PlayerPrefs.SetInt(BestTierKey, tier);
+            PlayerPrefs.Save();
+            TierChanged?.Invoke();
         }
 
         // Saves the rocket the player built last.
@@ -114,22 +106,17 @@ namespace RocketToTheMoon.Core
             return RocketDesign.FromJson(PlayerPrefs.GetString(RocketKey, ""));
         }
 
-        // Erases credits, bought parts, best altitude, seen parts and the saved rocket. The name is kept.
+        // Erases credits, old bought parts, best altitude, seen parts, best tier and the saved rocket. The name is kept.
         public static void NewGame()
         {
             PlayerPrefs.DeleteKey(CreditsKey);
             PlayerPrefs.DeleteKey(UnlockedKey);
             PlayerPrefs.DeleteKey(BestAltitudeKey);
             PlayerPrefs.DeleteKey(SeenKey);
+            PlayerPrefs.DeleteKey(BestTierKey);
             PlayerPrefs.DeleteKey(RocketKey);
             PlayerPrefs.Save();
             CreditsChanged?.Invoke();
-        }
-
-        // Reads the saved list of unlocked part ids.
-        public static List<string> UnlockedIds()
-        {
-            return ReadIds(UnlockedKey);
         }
 
         // Reads a saved list of part ids (saved as "id1,id2,").

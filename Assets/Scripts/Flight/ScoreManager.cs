@@ -21,7 +21,6 @@ namespace RocketToTheMoon.Core
             GameState.FlightEnded += OnFlightEnded;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.FlightEnded -= OnFlightEnded;

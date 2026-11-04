@@ -76,7 +76,7 @@ namespace RocketToTheMoon.Core
             StartCentre = Centre;
         }
 
-        // Runs the whole flight at once. Used by tests and to skip a flight.
+        // Runs the whole flight at once. Used to skip a flight.
         public void RunToEnd()
         {
             while (!Finished)

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4cc45bb28c97b642806bdf025d2b367, type: 3}
+  m_Name: Fin_1_T4
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FinData
+  id: fin_1_t4
+  partName: Fin Delta
+  icon: {fileID: 21300000, guid: 9fab15b36501d9549b5f4050466bd6a1, type: 3}
+  prefab: {fileID: 7993674905160730099, guid: bb920fdee12eac8439e115bad360603a, type: 3}
+  price: 800
+  tier: 4
+  unlockAltitude: 2000
+  mass: 0.012
+  dragArea: 0.0002
+  sideArea: 0.016

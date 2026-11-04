@@ -16,7 +16,6 @@ namespace RocketToTheMoon.UI
             GameState.AltitudeChanged += OnAltitudeChanged;
         }
 
-        // Stops listening.
         void OnDisable()
         {
             GameState.AltitudeChanged -= OnAltitudeChanged;

@@ -30,7 +30,6 @@ namespace RocketToTheMoon.UI
             Refresh();
         }
 
-        // Stops listening.
         void OnDisable()
         {
             builder.Changed -= Refresh;
@@ -70,17 +69,10 @@ namespace RocketToTheMoon.UI
                 launchButton.interactable = canLaunch;
         }
 
-        // How many parts are used out of the maximum. Turns cream with "FULL" when no more fit.
-        string PartsLine(int count)
+        // How many parts the rocket has.
+        static string PartsLine(int count)
         {
-            string line = "Parts  " + count + " / " + builder.MaxParts;
-            if (count < builder.MaxParts)
-                return line;
-            return "<color=#"
-                + ColorUtility.ToHtmlStringRGB(Palette.Moonlight)
-                + ">"
-                + line
-                + "  FULL</color>";
+            return "Parts  " + count;
         }
 
         // One line of advice. Thrust/weight above 1 means it goes up; it also goes up later if burning fuel makes it light enough.

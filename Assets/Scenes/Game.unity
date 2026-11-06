@@ -1252,6 +1252,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 152078121}
   m_CullTransparentMesh: 1
+--- !u!1 &152850656
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 152850659}
+  - component: {fileID: 152850658}
+  m_Layer: 0
+  m_Name: Sounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &152850658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f71e05ff6b372445a7528e7a56fce42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.Core.FlightSounds
+  simulator: {fileID: 1468679893}
+  thrusterStart: {fileID: 8300000, guid: c7eb0624f3ca6294c80b641cf6fe2e12, type: 3}
+  thrusterLoop: {fileID: 8300000, guid: c2c324011c6ca294b97715df3b7e78f5, type: 3}
+  falling: {fileID: 8300000, guid: 9fc2e63588f98034ea166cf6ac813e00, type: 3}
+  explosion: {fileID: 8300000, guid: 6668053f63025af4cbd1c1fca210fce1, type: 3}
+  score: {fileID: 2142088973}
+  newHighscore: {fileID: 8300000, guid: d1c67bdfc420b0744936b68b599eeba1, type: 3}
+  fallLeadTime: 1
+  fadeTime: 0.2
+--- !u!4 &152850659
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850656}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &159893154
 GameObject:
   m_ObjectHideFlags: 0
@@ -27605,3 +27658,4 @@ SceneRoots:
   - {fileID: 2142088974}
   - {fileID: 1489491535}
   - {fileID: 402234213}
+  - {fileID: 152850659}

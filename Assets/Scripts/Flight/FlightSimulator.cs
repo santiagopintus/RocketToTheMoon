@@ -43,14 +43,27 @@ namespace RocketToTheMoon.Core
 
         public float Gravity => gravity;
 
-        // True while the thrusters are firing.
-        public bool Burning => sim != null && sim.Burning;
+        // True while the thrusters are firing. A finished sim stops updating, so its last value does not count.
+        public bool Burning => sim != null && sim.Burning && !sim.Finished;
+
+        // True from launch until the rocket goes back to the pad.
+        public bool HasFlight => sim != null;
 
         // Remembers where the rocket sits on the pad.
         void Awake()
         {
             startPosition = transform.position;
             startRotation = transform.rotation;
+        }
+
+        // True if the rocket is falling fast enough to explode and, keeping this speed, reaches the ground within these seconds.
+        public bool WillCrashIn(float seconds)
+        {
+            if (sim == null || sim.Landed || !sim.LeftGround || sim.Velocity.y >= 0f)
+                return false;
+            if (sim.Velocity.magnitude < crashSpeed)
+                return false;
+            return (sim.Altitude + padHeight) / -sim.Velocity.y <= seconds;
         }
 
         // Reads the rocket parts and starts the flight with a new random wind. Called by the Launch button.

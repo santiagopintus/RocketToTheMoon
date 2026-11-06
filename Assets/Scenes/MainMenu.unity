@@ -411,6 +411,7 @@ GameObject:
   - component: {fileID: 136068301}
   - component: {fileID: 136068300}
   - component: {fileID: 136068299}
+  - component: {fileID: 136068303}
   m_Layer: 5
   m_Name: PlayButton
   m_TagString: Untagged
@@ -520,6 +521,19 @@ RectTransform:
   m_AnchoredPosition: {x: 170, y: -60}
   m_SizeDelta: {x: 520, y: 150}
   m_Pivot: {x: 0, y: 0.5}
+--- !u!114 &136068303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 136068298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70848de5d019de24289f09294aca6c1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.UI.HoverDarken
+  brightness: 0.85
 --- !u!1 &145818818
 GameObject:
   m_ObjectHideFlags: 0
@@ -614,6 +628,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 145818818}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &152850656
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 152850658}
+  - component: {fileID: 152850657}
+  m_Layer: 0
+  m_Name: Sounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &152850657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850656}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c483e92d60c8d5f4fb5268abb44e3dd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RocketToTheMoon::RocketToTheMoon.UI.ButtonHoverSound
+  hoverClip: {fileID: 8300000, guid: 44810d4002e05b34abd84e5b0caa0984, type: 3}
+--- !u!4 &152850658
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850656}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &195071875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10447,3 +10506,4 @@ SceneRoots:
   - {fileID: 1619399833}
   - {fileID: 399070037}
   - {fileID: 1768804422}
+  - {fileID: 152850658}

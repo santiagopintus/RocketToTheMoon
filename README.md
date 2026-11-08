@@ -12,7 +12,7 @@ How to play:
 
 My purpose was to practice game programming, physics simulation, and clean code design.
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/sXDWZeh5mn0)
 
 # Development Environment
 

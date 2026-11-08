@@ -20,6 +20,6 @@ MonoBehaviour:
   tier: 4
   unlockAltitude: 2000
   mass: 0.18
-  dragArea: 0.0028
+  dragArea: 0.0026
   sideArea: 0.0012
-  fuelCapacity: 0.8
+  fuelCapacity: 0.95

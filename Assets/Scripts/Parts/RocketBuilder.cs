@@ -7,8 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace RocketToTheMoon.Core
 {
-    // Lets the player build the rocket. A part dragged from the store floats under the cursor, glides onto the closest free snap point and stays there when dropped.
-    // A placed part can be dragged too: drop it on another free snap point to move it, or away from the rocket to remove it.
+    // This is one of the main scripts. This one handle the building of the rocket, dragging pieces, snaping, placing, 
     public class RocketBuilder : MonoBehaviour
     {
         [SerializeField]
@@ -109,7 +108,7 @@ namespace RocketToTheMoon.Core
             }
             else if (pointer.press.wasPressedThisFrame)
             {
-                RocketPart part = GrabbablePart(position);
+                RocketPart part = GetGrabbablePart(position);
                 if (part != null)
                 {
                     PickUp(part);
@@ -128,13 +127,13 @@ namespace RocketToTheMoon.Core
                 PartOutline.Show(preview.activeSelf ? preview : null);
             else
             {
-                RocketPart part = GrabbablePart(position);
+                RocketPart part = GetGrabbablePart(position);
                 PartOutline.Show(part != null ? part.gameObject : null);
             }
         }
 
         // The placed part a press would pick up now, or null (none while flying, dragging or over the UI).
-        RocketPart GrabbablePart(Vector2 position)
+        RocketPart GetGrabbablePart(Vector2 position)
         {
             if (preview != null || GameState.IsFlying || IsOverUI())
                 return null;
@@ -166,7 +165,7 @@ namespace RocketToTheMoon.Core
                 return false;
             if (HoveredCard != null)
                 return CanTake(HoveredCard);
-            return GrabbablePart(position) != null;
+            return GetGrabbablePart(position) != null;
         }
 
         // Returns true if a part can be dragged out of the store now: reached, affordable, under its limit and with a free spot.

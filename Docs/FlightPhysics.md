@@ -139,15 +139,15 @@ Tier 3 (the `_T3` models; `_1` is cheapest, `_3` most expensive, each with its o
 
 Thrusters: the Sipper is the most fuel-efficient but weak, the Titan pushes hardest but needs a lot of fuel.
 
-Tier 4 (the `_T4` models). The `_1_T4` line unlocks at 2000 m (the best T3 rocket reaches about 2190 m). The `_2_T4` line unlocks at 2800 m (the best `_1_T4` rocket reaches about 2900 m) and tops out at about 4100 m.
+Tier 4 (the `_T4` models). The `_1_T4` line unlocks at 2000 m (the best T3 rocket reaches about 2190 m). The `_2_T4` line unlocks at 2800 m (the best `_1_T4` rocket averages about 2820 m, from 2480 to 3160 m depending on the wind) and averages about 3120 m.
 
 | Part | Mass (g) | Drag area | Side area | Other | Price | Unlock |
 |---|---|---|---|---|---|---|
 | Body Heavy / Carbon | 70 / 60 | 0.0003 / 0.00025 | 0.004 / 0.0045 | | 1200 / 1800 | 2000 / 2800 m |
 | Nose Ogive / Needle | 40 / 35 | 0.00035 / 0.00025 | 0.0012 / 0.001 | | 1000 / 1500 | 2000 / 2800 m |
 | Fin Delta / Blade | 12 / 10 | 0.0002 / 0.00015 | 0.016 / 0.02 | | 800 / 1100 | 2000 / 2800 m |
-| Tank Heavy / Carbon | 180 / 160 | 0.0028 / 0.0025 | 0.0012 / 0.0011 | fuel 800 / 1000 g | 2500 / 3800 | 2000 / 2800 m |
-| Thruster Mammoth / Vector | 120 / 120 | 0.0009 / 0.0008 | 0.0006 / 0.0005 | 75 N 60 g/s / 85 N 60 g/s | 5000 / 7500 | 2000 / 2800 m |
+| Tank Heavy / Carbon | 180 / 160 | 0.0026 / 0.0025 | 0.0012 / 0.0011 | fuel 950 / 1000 g | 2500 / 3800 | 2000 / 2800 m |
+| Thruster Mammoth / Vector | 120 / 120 | 0.0009 / 0.0008 | 0.0006 / 0.0005 | 82 N 60 g/s / 85 N 60 g/s | 5000 / 7500 | 2000 / 2800 m |
 
 Older balance run (before the part limits, average of 5 winds): starter with fins low on the body about 85 m, fins in the middle 37 m, fins at the top 31 m, one fin 16 m, sharp nose 94 m, large tank 170 m, T2 with large tank 203 m, T2 with two large tanks 330 m, Thruster Large with two large tanks 373 m, T3 Sipper with two compact tanks 665 - 752 m (dome / cone / spike), Booster with two tall tanks 939 m, Titan with two giant tanks 1195 m.
 

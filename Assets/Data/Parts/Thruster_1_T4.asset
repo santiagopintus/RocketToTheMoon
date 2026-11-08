@@ -22,5 +22,5 @@ MonoBehaviour:
   mass: 0.12
   dragArea: 0.0009
   sideArea: 0.0006
-  thrust: 75
+  thrust: 82
   fuelPerSecond: 0.06

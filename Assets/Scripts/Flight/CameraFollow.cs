@@ -33,8 +33,7 @@ namespace RocketToTheMoon.Core
             lastRootRotation = target.rotation;
         }
 
-        // Moves the camera by how much the middle of the rocket moved, minus the extra lag from its speed.
-        // Only when the rocket itself moved, so adding parts while building does not move the camera.
+        // Update the camera position based on how much the center of the rocket moved while flying.
         void LateUpdate()
         {
             if (targetCamera == null || target == null)
@@ -59,7 +58,7 @@ namespace RocketToTheMoon.Core
             lastRootRotation = target.rotation;
         }
 
-        // The middle of all the rocket's meshes. Unlike the rocket's root, it does not swing around when the rocket spins.
+        // Returns the position of the center of thr rocket
         Vector3 Centre()
         {
             MeshRenderer[] renderers = target.GetComponentsInChildren<MeshRenderer>();

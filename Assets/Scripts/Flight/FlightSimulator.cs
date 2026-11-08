@@ -24,7 +24,7 @@ namespace RocketToTheMoon.Core
         float maxGust = 3f;
 
         [SerializeField]
-        float noNoseDrag = 0.004f;
+        float noNoseDrag = 0.004f; //fixed drag if no nose attatched
 
         [SerializeField]
         float endAtFraction = 0.7f;
@@ -74,11 +74,13 @@ namespace RocketToTheMoon.Core
                 return;
 
             ResetToPad();
-            sim = new RocketSim(ReadParts(), Random.Range(0, int.MaxValue), railTilt);
-            sim.gravity = gravity;
-            sim.railLength = railLength;
-            sim.maxGust = maxGust;
-            sim.groundDepth = padHeight;
+            sim = new RocketSim(ReadParts(), Random.Range(0, int.MaxValue), railTilt)
+            {
+                gravity = gravity,
+                railLength = railLength,
+                maxGust = maxGust,
+                groundDepth = padHeight
+            };
             GameState.StartFlight();
         }
 

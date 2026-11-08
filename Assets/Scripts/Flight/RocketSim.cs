@@ -55,7 +55,7 @@ namespace RocketToTheMoon.Core
         public Vector2 RootPosition => Centre - Rotate(CentreLocal, Angle);
 
         // Sets up the rocket on the pad and picks this flight's wind from the seed.
-        // The rail leans railTilt degrees to a random side (from the seed), so the rocket flies an arc like a real one.
+        // The idea is to add randomness to the starting direction to avoid a stiff/perfect vertical flight
         public RocketSim(List<FlightPart> rocketParts, int seed, float railTilt = 0f)
         {
             parts = rocketParts;
@@ -95,11 +95,11 @@ namespace RocketToTheMoon.Core
             CentreLocal = CentreOfMass(mass);
             float inertia = Inertia(CentreLocal);
 
-            Vector2 up = new Vector2(-Mathf.Sin(Angle), Mathf.Cos(Angle));
-            Vector2 side = new Vector2(Mathf.Cos(Angle), Mathf.Sin(Angle));
-            Vector2 wind = new Vector2(maxGust * Gust(), 0f);
+            Vector2 up = new(-Mathf.Sin(Angle), Mathf.Cos(Angle));
+            Vector2 side = new(Mathf.Cos(Angle), Mathf.Sin(Angle));
+            Vector2 wind = new(maxGust * Gust(), 0f);
 
-            Vector2 force = new Vector2(0f, -mass * gravity);
+            Vector2 force = new(0f, -mass * gravity);
             float torque = -spinDamping * Spin;
 
             foreach (FlightPart part in parts)

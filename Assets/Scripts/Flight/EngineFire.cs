@@ -89,7 +89,6 @@ namespace RocketToTheMoon.Core
         }
 
         // Makes the fire longer for stronger rockets by making the particles faster.
-        // Uses the square root so weak and strong thrusters both look good.
         void SetFireLength()
         {
             float thrust = 0f;

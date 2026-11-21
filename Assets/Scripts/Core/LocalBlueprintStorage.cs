@@ -12,7 +12,7 @@ namespace RocketToTheMoon.Core
         const string TimeLowKey = "BlueprintTimeLow_";
         const string TimeHighKey = "BlueprintTimeHigh_";
 
-        // Reads the saved names (saved as "name1,name2,").
+        // Reads the saved names
         public override List<string> Names()
         {
             string saved = PlayerPrefs.GetString(NamesKey, "");

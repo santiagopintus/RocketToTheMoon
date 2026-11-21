@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace RocketToTheMoon.Core
 {
     // A place where rocket blueprints are kept. It only says WHAT can be done, not HOW.
-    // Subclasses decide where the blueprints live: LocalBlueprintStorage (this browser) now, a cloud one later.
+    // Subclasses decide where the blueprints live: LocalBlueprintStorage
     public abstract class BlueprintStorage
     {
         public const int MaxSlots = 5;

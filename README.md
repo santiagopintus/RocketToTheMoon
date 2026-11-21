@@ -8,7 +8,7 @@ The C# code covers variables, expressions, conditionals, loops, functions and cl
 
 My purpose was to practice writing readable C# and to understand how the language's core features fit together in a real project.
 
-[Software Demo Video](http://youtube.link.goes.here)
+[Software Demo Video](https://youtu.be/rPy_7nQWkqs)
 
 # Development Environment
 

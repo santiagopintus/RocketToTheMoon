@@ -498,6 +498,37 @@ namespace RocketToTheMoon.Core
             return Mathf.RoundToInt(total);
         }
 
+        // What the whole rocket on the pad sells for.
+        public int RocketValue()
+        {
+            int total = 0;
+            foreach (Transform child in transform)
+                if (child.GetComponent<RocketPart>() != null)
+                    total += Value(child.gameObject);
+            return total;
+        }
+
+        // Sells every part on the rocket back and removes them, so the pad is empty.
+        public void Clear()
+        {
+            PlayerSession.AddCredits(RocketValue());
+
+            var parts = new List<Transform>();
+            foreach (Transform child in transform)
+                if (child.GetComponent<RocketPart>() != null)
+                    parts.Add(child);
+
+            // Taken off the rocket first, so nothing counts them until they are gone at the end of the frame.
+            foreach (Transform part in parts)
+            {
+                part.SetParent(null);
+                Destroy(part.gameObject);
+            }
+
+            padSnap.taken = false;
+            Changed?.Invoke();
+        }
+
         // Turns the placed parts into a RocketDesign. Parts that are not attached (or hang from one that is not) are left out.
         public RocketDesign ToDesign()
         {

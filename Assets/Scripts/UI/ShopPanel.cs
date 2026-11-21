@@ -41,6 +41,9 @@ namespace RocketToTheMoon.UI
         [SerializeField]
         float slideSpeed = 8f;
 
+        // Every part the game has, sorted by unlock altitude.
+        public PartData[] Parts => parts;
+
         readonly List<Button> tabs = new List<Button>();
         RectTransform rect;
         bool isOpen;

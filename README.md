@@ -1,32 +1,28 @@
 # Overview
 
-As a software engineer, I wanted to learn how to build a complete game from scratch: designing the systems, writing the physics, and shipping it to the web.
+As a software engineer, I wanted to strengthen my C# skills by building a full game from the ground up, covering clean class design, physics code and saving data.
 
-Rocket To The Moon is a 3D rocket-building game that runs in the browser. You buy parts, assemble a rocket, launch it, and earn credits based on the highest altitude it reaches. Use the credits to buy better parts and try again.
+Rocket Workshop is a 3D rocket-building game for the browser. Pick a rocket body, add parts from the store, launch it, and earn credits from the highest altitude it reaches. You can then spend those credits on better parts and save your rocket designs as blueprints.
 
-How to play:
-* Enter your name and press Play.
-* Drag parts from the store onto the rocket (a body goes first).
-* Press Launch and watch your rocket fly.
-* Spend your credits on new parts and beat your best altitude.
+The C# code covers variables, expressions, conditionals, loops, functions and classes, plus a struct and a union (`StructLayout` with `FieldOffset`) in `BlueprintInfo`. It also reads and writes blueprint files in `LocalBlueprintStorage` and uses inheritance with the `abstract` keyword (`BlueprintStorage` and `PartData`).
 
-My purpose was to practice game programming, physics simulation, and clean code design.
+My purpose was to practice writing readable C# and to understand how the language's core features fit together in a real project.
 
-[Software Demo Video](https://youtu.be/sXDWZeh5mn0)
+[Software Demo Video](http://youtube.link.goes.here)
 
 # Development Environment
 
 * Unity 6, Blender (3D models), Git and GitHub
-* C#
+* C# (Unity engine, TextMeshPro and Input System packages)
 
 # Useful Websites
 
-* [Enjoy the game online!](https://santiagopintus.github.io/RocketToTheMoon/)
+* [Microsoft C# Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)
 * [Unity Documentation](https://docs.unity3d.com/)
 * [Blender Manual](https://docs.blender.org/manual/)
 
 # Future Work
 
-* Saving game slots
+* Cloud saving of player profiles
 * Music
 * Mobile touch support
